@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
-$: << File.expand_path("../test", __dir__)
-
 require "bundler/setup"
-require "rails/plugin/test"
+
+Dir.chdir(File.expand_path('../test/dummy', __dir__))
+
+args = ARGV.join(' ')
+system("bundle exec rspec #{args}")
