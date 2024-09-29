@@ -2,11 +2,11 @@ module Narabikae
   class Position
     # Initializes a new instance of the Position class.
     #
-    # @param model  [Object] This params must be a base_class
+    # @param record  [Object] Active Record object.
     # @param column [Symbol] The column symbol. ex: :position
     # @param option [Option] this is a Option struct object
-    def initialize(model, column, option)
-      @model  = model
+    def initialize(record, column, option)
+      @record = record
       @column = column
       @option = option
     end
@@ -109,7 +109,7 @@ module Narabikae
 
     private
 
-    attr_reader :model, :column, :option
+    attr_reader :record, :column, :option
 
     def capable?(key)
       option.size >= key.size
@@ -129,6 +129,10 @@ module Narabikae
 
     def current_last_position
       model.maximum(column)
+    end
+
+    def model
+      record.class.base_class
     end
 
     # generate a random fractional part

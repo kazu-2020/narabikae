@@ -2,7 +2,11 @@ require 'rails_helper'
 
 describe Narabikae::Position do
   describe '#create_last_position' do
-    subject { described_class.new(Task, :position, {}).create_last_position }
+    subject { position.create_last_position }
+
+    let(:position) {
+      described_class.new(Task.new, :position, Struct.new(:size).new(30))
+    }
 
     context 'DB table is empty' do
       it { is_expected.to eq('a0') }
@@ -20,10 +24,10 @@ describe Narabikae::Position do
   end
 
   describe '#find_position_after' do
-    subject {
-      described_class
-        .new(Task, :position, Struct.new(:size).new(30))
-        .find_position_after(target)
+    subject { position.find_position_after(target) }
+
+    let(:position) {
+      described_class.new(Task.new, :position, Struct.new(:size).new(30))
     }
 
     context 'when target has valid position' do
@@ -35,7 +39,7 @@ describe Narabikae::Position do
     context 'when target has invalid position' do
       let(:target) { Task.build(position: 'invalid') }
 
-      it { is_expected.to eq(nil) }
+      it { is_expected.to be_nil }
     end
 
     context 'when target is the largest positive integer' do
@@ -57,10 +61,8 @@ describe Narabikae::Position do
     end
 
     describe 'try to generate key until the challenge count reaches the limit' do
-      subject {
-        described_class
-          .new(Task, :position, Struct.new(:size).new(10))
-          .find_position_after(target)
+      let(:position) {
+        described_class.new(Task.new, :position, Struct.new(:size).new(10))
       }
 
       context 'when first generated key is invalid' do
@@ -75,14 +77,12 @@ describe Narabikae::Position do
 
       context 'when all generated keys are invalid' do
         # size is 0 so that the key is invalid
-        let(:stub) {
-          described_class.new(Task, :position, Struct.new(:size).new(0))
+        let(:position) {
+          described_class.new(Task.new, :position, Struct.new(:size).new(0))
         }
         let(:target) { Task.build(position: 'a1') }
 
         before do
-          allow(described_class).to receive(:new).and_return(stub)
-
           Task.create!(position: 'a2')
         end
 
@@ -91,37 +91,37 @@ describe Narabikae::Position do
 
       context 'when challenge is nil or 0' do
         subject {
-          described_class
-            .new(Task, :position, Struct.new(:size).new(10))
+          position
             .find_position_after(target, challenge: 0)
         }
 
-        let(:stub) {
-          described_class.new(Task, :position, Struct.new(:size).new(0))
+        let(:position) {
+          described_class.new(Task.new, :position, Struct.new(:size).new(0))
         }
+
         let(:target) { Task.build(position: 'a1') }
 
         before do
-          allow(described_class).to receive(:new).and_return(stub)
-          allow(stub).to receive(:random_fractional).and_return('V')
+          allow(position).to receive(:random_fractional)
         end
 
-        it { is_expected.to eq(nil) }
+        it { is_expected.to be_nil }
 
         it 'does not try to generate key' do
           subject
-          expect(stub).not_to have_received(:random_fractional)
+          expect(position).not_to have_received(:random_fractional)
         end
       end
     end
   end
 
   describe '#find_position_before' do
-    subject {
+    subject { position.find_position_before(target) }
+
+    let(:position) {
       described_class
-        .new(Task, :position, Struct.new(:size).new(30))
-        .find_position_before(target)
-      }
+        .new(Task.new, :position, Struct.new(:size).new(30))
+    }
 
     context 'when target has valid position' do
       let(:target) { Task.build(position: 'a0') }
@@ -132,7 +132,7 @@ describe Narabikae::Position do
     context 'when target has invalid position' do
       let(:target) { Task.build(position: 'invalid') }
 
-      it { is_expected.to eq(nil) }
+      it { is_expected.to be_nil }
     end
 
     # edge case: this situation is typically unlikely to occur.
@@ -162,10 +162,9 @@ describe Narabikae::Position do
     end
 
     describe 'try to generate key until the challenge count reaches the limit' do
-      subject {
+      let(:position) {
         described_class
-          .new(Task, :position, Struct.new(:size).new(10))
-          .find_position_before(target)
+          .new(Task.new, :position, Struct.new(:size).new(10))
       }
 
       context 'when first generated key is invalid' do
@@ -180,42 +179,35 @@ describe Narabikae::Position do
 
       context 'when all generated keys are invalid' do
         # size is 0 so that the key is invalid
-        let(:stub) {
-          described_class.new(Task, :position, Struct.new(:size).new(0))
+        let(:position) {
+          described_class.new(Task.new, :position, Struct.new(:size).new(0))
         }
         let(:target) { Task.build(position: 'a1') }
 
         before do
-          allow(described_class).to receive(:new).and_return(stub)
-
           Task.create!(position: 'a0')
         end
 
-        it { is_expected.to eq(nil) }
+        it { is_expected.to be_nil }
       end
 
       context 'when challenge is nil or 0' do
-        subject {
-          described_class
-            .new(Task, :position, Struct.new(:size).new(10))
-            .find_position_before(target, challenge: 0)
-        }
+        subject { position.find_position_before(target, challenge: 0) }
 
-        let(:stub) {
-          described_class.new(Task, :position, Struct.new(:size).new(0))
+        let(:position) {
+          described_class.new(Task.new, :position, Struct.new(:size).new(0))
         }
         let(:target) { Task.build(position: 'a1') }
 
         before do
-          allow(described_class).to receive(:new).and_return(stub)
-          allow(stub).to receive(:random_fractional).and_return('V')
+          allow(position).to receive(:random_fractional)
         end
 
         it { is_expected.to eq(nil) }
 
         it 'does not try to generate key' do
           subject
-          expect(stub).not_to have_received(:random_fractional)
+          expect(position).not_to have_received(:random_fractional)
         end
       end
     end
@@ -229,9 +221,8 @@ describe Narabikae::Position do
     context 'when prev_target is nil' do
       let(:position) {
         described_class
-          .new(Task, :position, Struct.new(:size).new(30))
+          .new(Task.new, :position, Struct.new(:size).new(30))
       }
-
       let(:prev_target) { nil }
       let(:next_target) { Task.build(position: 'a0') }
 
@@ -251,9 +242,8 @@ describe Narabikae::Position do
     context 'when next_target is nil' do
       let(:position) {
         described_class
-          .new(Task, :position, Struct.new(:size).new(30))
+          .new(Task.new, :position, Struct.new(:size).new(30))
       }
-
       let(:prev_target) { Task.build(position: 'a0') }
       let(:next_target) { nil }
 
@@ -273,9 +263,8 @@ describe Narabikae::Position do
     context 'when prev_target and next_target is presence' do
       let(:position) {
         described_class
-          .new(Task, :position, Struct.new(:size).new(30))
+          .new(Task.new, :position, Struct.new(:size).new(30))
       }
-
       let(:prev_target) { Task.build(position: 'a1') }
       let(:next_target) { Task.build(position: 'a0') }
 
@@ -286,9 +275,8 @@ describe Narabikae::Position do
     context 'when prev_target has invalid position and next_target has invalid position ' do
       let(:position) {
         described_class
-          .new(Task, :position, Struct.new(:size).new(30))
+          .new(Task.new, :position, Struct.new(:size).new(30))
       }
-
       let(:prev_target) { Task.build(position: 'invalid') }
       let(:next_target) { Task.build(position: 'invalid') }
 
@@ -299,9 +287,8 @@ describe Narabikae::Position do
       context 'when first generated key is invalid' do
         let(:position) {
           described_class
-            .new(Task, :position, Struct.new(:size).new(10))
+            .new(Task.new, :position, Struct.new(:size).new(10))
         }
-
         let(:prev_target) { Task.build(position: 'a0') }
         let(:next_target) { Task.build(position: 'a2') }
 
@@ -316,9 +303,8 @@ describe Narabikae::Position do
         # size is 0 so that the key is invalid
         let(:position) {
           described_class
-            .new(Task, :position, Struct.new(:size).new(0))
+            .new(Task.new, :position, Struct.new(:size).new(0))
         }
-
         let(:prev_target) { Task.build(position: 'a0') }
         let(:next_target) { Task.build(position: 'a2') }
 
@@ -333,9 +319,8 @@ describe Narabikae::Position do
 
         let(:position) {
           described_class
-            .new(Task, :position, Struct.new(:size).new(10))
+            .new(Task.new, :position, Struct.new(:size).new(10))
         }
-
         let(:prev_target) { Task.build(position: 'a0') }
         let(:next_target) { Task.build(position: 'a2') }
 
@@ -355,7 +340,9 @@ describe Narabikae::Position do
   end
 
   describe 'private #current_first_position' do
-    subject { described_class.new(Task, :position, {}).send(:current_first_position) }
+    subject { position.send(:current_first_position) }
+
+    let(:position) { described_class.new(Task.new, :position, {}) }
 
     context 'when DB table is empty' do
       it { is_expected.to eq(nil) }
@@ -373,10 +360,10 @@ describe Narabikae::Position do
 
 
   describe 'private #capable?' do
-    subject {
-      described_class
-        .new(Task, :position, Struct.new(:size).new(10))
-        .send(:capable?, key)
+    subject { position.send(:capable?, key) }
+
+    let(:position) {
+      described_class.new(Task.new, :position, Struct.new(:size).new(10))
     }
 
     context 'when key is less than' do
@@ -399,9 +386,11 @@ describe Narabikae::Position do
   end
 
   describe 'private #uniq?' do
-    subject { described_class.new(Task, :position, {}).send(:uniq?, key) }
+    subject { position.send(:uniq?, key) }
 
-    let(:task) { Task.new }
+    let(:position) {
+      described_class.new(Task.new, :position, {})
+    }
     let(:key) { 'a1' }
 
     context 'when key is already in use' do
@@ -418,19 +407,22 @@ describe Narabikae::Position do
   end
 
   describe 'private #valid?' do
-    subject {
+    subject { position.send(:valid?, key) }
+
+    let(:position) {
       described_class
-        .new(Task, :position, Struct.new(:size).new(10))
-        .send(:valid?, key)
+        .new(Task.new, :position, Struct.new(:size).new(10))
     }
 
     context 'when key is nil' do
       let(:key) { nil }
+
       it { is_expected.to eq(false) }
     end
 
     context 'when key is empty' do
       let(:key) { '' }
+
       it { is_expected.to eq(false) }
     end
 
