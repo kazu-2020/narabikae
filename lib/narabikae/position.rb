@@ -77,6 +77,36 @@ module Narabikae
       nil
     end
 
+    # Finds the position between two targets.
+    #
+    # @param prev_target [#send(column)] The previous target.
+    # @param next_target [#send(column)] The next target.
+    # @param args [Hash] Additional arguments.
+    # @option args [Integer] :challenge The number of times to attempt finding a valid position.
+    # @return [string, nil] The position between the two targets, or nil if no valid position is found.
+    def find_position_between(prev_target, next_target, **args)
+      return find_position_before(next_target, **args) if prev_target.blank?
+      return find_position_after(prev_target, **args)  if next_target.blank?
+
+      merged_args = { challenge: 10 }.merge(args)
+
+      prev_key, next_key = [ prev_target.send(column), next_target.send(column) ].minmax
+      key = FractionalIndexer.generate_key(
+              prev_key: prev_key,
+              next_key: next_key,
+            )
+      return key if valid?(key)
+
+      (merged_args[:challenge] || 0).times do
+        key += random_fractional
+        return key if valid?(key)
+      end
+
+      nil
+    rescue FractionalIndexer::Error
+      nil
+    end
+
     private
 
     attr_reader :model, :column, :option

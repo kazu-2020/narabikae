@@ -221,6 +221,139 @@ describe Narabikae::Position do
     end
   end
 
+  describe '#find_position_between' do
+    subject {
+      position.find_position_between(prev_target, next_target)
+    }
+
+    context 'when prev_target is nil' do
+      let(:position) {
+        described_class
+          .new(Task, :position, Struct.new(:size).new(30))
+      }
+
+      let(:prev_target) { nil }
+      let(:next_target) { Task.build(position: 'a0') }
+
+      before do
+        allow(position).to receive(:find_position_before).and_call_original
+      end
+
+      it { is_expected.to eq('Zz') }
+
+      it 'calls #find_position_before' do
+        subject
+
+        expect(position).to have_received(:find_position_before).with(next_target)
+      end
+    end
+
+    context 'when next_target is nil' do
+      let(:position) {
+        described_class
+          .new(Task, :position, Struct.new(:size).new(30))
+      }
+
+      let(:prev_target) { Task.build(position: 'a0') }
+      let(:next_target) { nil }
+
+      before do
+        allow(position).to receive(:find_position_after).and_call_original
+      end
+
+      it { is_expected.to eq('a1') }
+
+      it 'calls #find_position_after' do
+        subject
+
+        expect(position).to have_received(:find_position_after).with(prev_target)
+      end
+    end
+
+    context 'when prev_target and next_target is presence' do
+      let(:position) {
+        described_class
+          .new(Task, :position, Struct.new(:size).new(30))
+      }
+
+      let(:prev_target) { Task.build(position: 'a1') }
+      let(:next_target) { Task.build(position: 'a0') }
+
+
+      it { is_expected.to eq('a0V') }
+    end
+
+    context 'when prev_target has invalid position and next_target has invalid position ' do
+      let(:position) {
+        described_class
+          .new(Task, :position, Struct.new(:size).new(30))
+      }
+
+      let(:prev_target) { Task.build(position: 'invalid') }
+      let(:next_target) { Task.build(position: 'invalid') }
+
+      it { is_expected.to be_nil }
+    end
+
+    describe 'try to generate key until the challenge count reaches the limit' do
+      context 'when first generated key is invalid' do
+        let(:position) {
+          described_class
+            .new(Task, :position, Struct.new(:size).new(10))
+        }
+
+        let(:prev_target) { Task.build(position: 'a0') }
+        let(:next_target) { Task.build(position: 'a2') }
+
+        before do
+          Task.create(position: 'a1')
+        end
+
+        it { is_expected.to match(/^a1.$/) }
+      end
+
+      context 'when all generated keys are invalid' do
+        # size is 0 so that the key is invalid
+        let(:position) {
+          described_class
+            .new(Task, :position, Struct.new(:size).new(0))
+        }
+
+        let(:prev_target) { Task.build(position: 'a0') }
+        let(:next_target) { Task.build(position: 'a2') }
+
+        it { is_expected.to eq(nil) }
+      end
+
+      context 'when challenge is nil or 0' do
+        subject {
+          position
+            .find_position_between(prev_target, next_target, challenge: 0)
+        }
+
+        let(:position) {
+          described_class
+            .new(Task, :position, Struct.new(:size).new(10))
+        }
+
+        let(:prev_target) { Task.build(position: 'a0') }
+        let(:next_target) { Task.build(position: 'a2') }
+
+        before do
+          Task.create(position: 'a1')
+          allow(position).to receive(:random_fractional)
+        end
+
+        it { is_expected.to eq(nil) }
+
+        it 'does not retry to generate key' do
+          subject
+          expect(position).not_to have_received(:random_fractional)
+        end
+      end
+    end
+  end
+
   describe 'private #current_first_position' do
     subject { described_class.new(Task, :position, {}).send(:current_first_position) }
 
