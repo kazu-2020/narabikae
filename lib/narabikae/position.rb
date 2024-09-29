@@ -24,12 +24,46 @@ module Narabikae
     # challenge count is 10 by default.
     #
     # @param target [#send(column)]
-    # @return [String] The generated key for the position after the target.
+    # @param args [Hash] Additional arguments.
+    # @option args [Integer] :challenge The number of times to attempt finding a valid position.
+    # @return [String, nil] The generated key for the position after the target, or nil if no valid position is found.
     def find_position_after(target, **args)
       merged_args = { challenge: 10 }.merge(args)
       # when target is nil, try to generate key from the last position
       key = FractionalIndexer.generate_key(
               prev_key: target&.send(column) || current_last_position
+            )
+      return key if valid?(key)
+
+      (merged_args[:challenge] || 0).times do
+        key += random_fractional
+        return key if valid?(key)
+      end
+
+      nil
+    rescue FractionalIndexer::Error
+      nil
+    end
+
+    #
+    # Finds the position before the target position.
+    # If generated key is invalid(ex: it already exists),
+    # a new key is generated until the challenge count reaches the limit.
+    # challenge count is 10 by default.
+    #
+    # @example
+    #   position = Position.new
+    #   position.find_position_before(target, challenge: 5)
+    #
+    # @param target [#send(column)]
+    # @param args [Hash] Additional arguments.
+    # @option args [Integer] :challenge The number of times to attempt finding a valid position.
+    # @return [String, nil] The generated key for the position before the target, or nil if no valid position is found.
+    def find_position_before(target, **args)
+      merged_args = { challenge: 10 }.merge(args)
+      # when target is nil, try to generate key from the first position
+      key = FractionalIndexer.generate_key(
+              next_key: target&.send(column) || current_first_position
             )
       return key if valid?(key)
 
@@ -59,16 +93,20 @@ module Narabikae
       end
     end
 
+    def current_first_position
+      model.minimum(column)
+    end
+
     def current_last_position
       model.maximum(column)
     end
 
     # generate a random fractional part
     #
-    # @note `fractional` represents the fractional part, but to ensure that the last digit is not zero value (ex: base_62 => '0'), the range is set to [1..].
+    # @return [String] The random fractional part.
     # @see https://github.com/kazu-2020/fractional_indexer?tab=readme-ov-file#fractional-part
     def random_fractional
-      # Array.new(5) { FractionalIndexer.configuration.digits[1..].sample }.join
+      # `fractional` represents the fractional part, but to ensure that the last digit is not zero value (ex: base_62 => '0'), the range is set to [1..].
       FractionalIndexer.configuration.digits[1..].sample
     end
 
