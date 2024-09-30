@@ -17,7 +17,7 @@ describe Narabikae::ActiveRecordExtension do
   end
 
   describe "#move_to_after" do
-    subject { instance.move_to_after(target) }
+    subject { instance.move_to_after(target, challenge: 0) }
 
     context 'when the new position generation fails ' do
       let(:instance) {
@@ -52,7 +52,7 @@ describe Narabikae::ActiveRecordExtension do
   end
 
   describe "#move_to_before" do
-    subject { instance.move_to_before(target) }
+    subject { instance.move_to_before(target, challenge: nil) }
 
     context 'when the new position generation fails ' do
       let(:instance) {
@@ -86,7 +86,7 @@ describe Narabikae::ActiveRecordExtension do
   end
 
   describe "#move_to_between" do
-    subject { instance.move_to_between(prev_target, next_target) }
+    subject { instance.move_to_between(prev_target, next_target, challenge: 5) }
 
     context 'when the new position generation fails ' do
       let(:instance) {
