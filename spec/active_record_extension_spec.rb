@@ -1,6 +1,74 @@
 require 'rails_helper'
 
 describe Narabikae::ActiveRecordExtension do
+  describe "#auto_set_position?" do
+    subject { instance.auto_set_position? }
+
+    context 'when record has invalid key' do
+      let(:instance) {
+        described_class.new(
+          Task.build(position: 'invalid'),
+          :position,
+          Struct.new(:size, :scope).new(10, [])
+        )
+      }
+
+      it { is_expected.to eq true }
+    end
+
+    context "when record don't have scope" do
+      let(:instance) {
+        described_class.new(
+          Task.create(position: 'a0'),
+          :position,
+          Struct.new(:size, :scope).new(10, [])
+        )
+      }
+
+      it { is_expected.to eq false }
+    end
+
+    context 'There is scope for record, but no change' do
+      let(:instance) {
+        described_class.new(
+          Task.create(position: 'a0'),
+          :position,
+          Struct.new(:size, :scope).new(10, %i[user_id])
+        )
+      }
+
+      it { is_expected.to eq false }
+    end
+
+    context 'There is scope for record, and there is change' do
+      let(:instance) {
+        described_class.new(
+          record,
+          :position,
+          Struct.new(:size, :scope).new(10, %i[user_id])
+        )
+      }
+      let(:record) { Task.create(position: 'a0') }
+
+      before do
+        record.user_id = 1
+      end
+
+
+      context "record won't save change to column" do
+        it { is_expected.to eq true }
+      end
+
+      context 'record will save change to column' do
+        before do
+          record.position = 'a1'
+        end
+
+        it { is_expected.to eq false }
+      end
+    end
+  end
+
   describe "#set_position" do
     subject { instance.set_position }
 
