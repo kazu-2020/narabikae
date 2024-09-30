@@ -115,20 +115,12 @@ module Narabikae
       option.size >= key.size
     end
 
-    def challenge_generate_key(time, &block)
-      time.times do
-        result = block.call
-
-        return result if valid?(result)
-      end
-    end
-
     def current_first_position
-      model.minimum(column)
+      model.merge(model_scope).minimum(column)
     end
 
     def current_last_position
-      model.maximum(column)
+      model.merge(model_scope).maximum(column)
     end
 
     def model
@@ -144,8 +136,13 @@ module Narabikae
       FractionalIndexer.configuration.digits[1..].sample
     end
 
+    def model_scope
+      option_scope = option.scope.is_a?(Array) ? option.scope : []
+      model.where(record.slice(*option_scope))
+    end
+
     def uniq?(key)
-      model.where(column => key).empty?
+      model.where(column => key).merge(model_scope).empty?
     end
 
     def valid?(key)

@@ -5,7 +5,11 @@ describe Narabikae::Position do
     subject { position.create_last_position }
 
     let(:position) {
-      described_class.new(Task.new, :position, Struct.new(:size).new(30))
+      described_class.new(
+        Task.new,
+        :position,
+        Struct.new(:size, :scope).new(30, nil)
+      )
     }
 
     context 'DB table is empty' do
@@ -14,12 +18,29 @@ describe Narabikae::Position do
 
     context 'DB table has records' do
       before do
-        Task.insert({ position: 'a0' })
-        Task.insert({ position: 'c112' })
-        Task.insert({ position: 'W112a' })
+        Task.create({ position: 'a0' })
+        Task.create({ position: 'c112' })
+        Task.create({ position: 'W112a' })
       end
 
       it { is_expected.to eq('c113') }
+    end
+
+    context 'when option has scope' do
+      let(:position) {
+        described_class.new(
+          Task.new(user_id: 1),
+          :position,
+          Struct.new(:size, :scope).new(30, %i[user_id])
+        )
+      }
+
+      before do
+        Task.create!(user_id: 1, position: 'a5')
+        Task.create!(user_id: 2, position: 'a7')
+      end
+
+      it { is_expected.to eq('a6') }
     end
   end
 
@@ -27,7 +48,11 @@ describe Narabikae::Position do
     subject { position.find_position_after(target) }
 
     let(:position) {
-      described_class.new(Task.new, :position, Struct.new(:size).new(30))
+      described_class.new(
+        Task.new,
+        :position,
+        Struct.new(:size, :scope).new(30, nil)
+      )
     }
 
     context 'when target has valid position' do
@@ -62,7 +87,11 @@ describe Narabikae::Position do
 
     describe 'try to generate key until the challenge count reaches the limit' do
       let(:position) {
-        described_class.new(Task.new, :position, Struct.new(:size).new(10))
+        described_class.new(
+          Task.new,
+          :position,
+          Struct.new(:size, :scope).new(10, nil)
+        )
       }
 
       context 'when first generated key is invalid' do
@@ -113,14 +142,34 @@ describe Narabikae::Position do
         end
       end
     end
+
+    describe 'option has scope' do
+      let(:position) {
+        described_class.new(
+          Task.new(user_id: 1),
+          :position,
+          Struct.new(:size, :scope).new(30, %i[user_id])
+        )
+      }
+      let(:target) { Task.build(position: 'a0') }
+
+      before do
+        Task.create!(user_id: 2, position: 'a1')
+      end
+
+      it { is_expected.to eq('a1') }
+    end
   end
 
   describe '#find_position_before' do
     subject { position.find_position_before(target) }
 
     let(:position) {
-      described_class
-        .new(Task.new, :position, Struct.new(:size).new(30))
+      described_class.new(
+        Task.new,
+        :position,
+        Struct.new(:size, :scope).new(30, nil)
+      )
     }
 
     context 'when target has valid position' do
@@ -163,8 +212,11 @@ describe Narabikae::Position do
 
     describe 'try to generate key until the challenge count reaches the limit' do
       let(:position) {
-        described_class
-          .new(Task.new, :position, Struct.new(:size).new(10))
+        described_class.new(
+          Task.new,
+          :position,
+          Struct.new(:size, :scope).new(10, nil)
+        )
       }
 
       context 'when first generated key is invalid' do
@@ -211,6 +263,23 @@ describe Narabikae::Position do
         end
       end
     end
+
+    context 'when option has scope' do
+      let(:position) {
+        described_class.new(
+          Task.new(user_id: 1),
+          :position,
+          Struct.new(:size, :scope).new(30, %i[user_id])
+        )
+      }
+      let(:target) { Task.build(position: 'a1') }
+
+      before do
+        Task.create!(user_id: 2, position: 'a0')
+      end
+
+      it { is_expected.to eq('a0') }
+    end
   end
 
   describe '#find_position_between' do
@@ -220,8 +289,11 @@ describe Narabikae::Position do
 
     context 'when prev_target is nil' do
       let(:position) {
-        described_class
-          .new(Task.new, :position, Struct.new(:size).new(30))
+        described_class.new(
+          Task.new,
+          :position,
+          Struct.new(:size, :scope).new(30, nil)
+        )
       }
       let(:prev_target) { nil }
       let(:next_target) { Task.build(position: 'a0') }
@@ -241,8 +313,11 @@ describe Narabikae::Position do
 
     context 'when next_target is nil' do
       let(:position) {
-        described_class
-          .new(Task.new, :position, Struct.new(:size).new(30))
+        described_class.new(
+          Task.new,
+          :position,
+          Struct.new(:size, :scope).new(30, nil)
+        )
       }
       let(:prev_target) { Task.build(position: 'a0') }
       let(:next_target) { nil }
@@ -262,8 +337,11 @@ describe Narabikae::Position do
 
     context 'when prev_target and next_target is presence' do
       let(:position) {
-        described_class
-          .new(Task.new, :position, Struct.new(:size).new(30))
+        described_class.new(
+          Task.new,
+          :position,
+          Struct.new(:size, :scope).new(30, nil)
+        )
       }
       let(:prev_target) { Task.build(position: 'a1') }
       let(:next_target) { Task.build(position: 'a0') }
@@ -274,8 +352,11 @@ describe Narabikae::Position do
 
     context 'when prev_target has invalid position and next_target has invalid position ' do
       let(:position) {
-        described_class
-          .new(Task.new, :position, Struct.new(:size).new(30))
+        described_class.new(
+          Task.new,
+          :position,
+          Struct.new(:size, :scope).new(30, nil)
+        )
       }
       let(:prev_target) { Task.build(position: 'invalid') }
       let(:next_target) { Task.build(position: 'invalid') }
@@ -286,8 +367,11 @@ describe Narabikae::Position do
     describe 'try to generate key until the challenge count reaches the limit' do
       context 'when first generated key is invalid' do
         let(:position) {
-          described_class
-            .new(Task.new, :position, Struct.new(:size).new(10))
+          described_class.new(
+            Task.new,
+            :position,
+            Struct.new(:size, :scope).new(10, nil)
+          )
         }
         let(:prev_target) { Task.build(position: 'a0') }
         let(:next_target) { Task.build(position: 'a2') }
@@ -302,8 +386,11 @@ describe Narabikae::Position do
       context 'when all generated keys are invalid' do
         # size is 0 so that the key is invalid
         let(:position) {
-          described_class
-            .new(Task.new, :position, Struct.new(:size).new(0))
+          described_class.new(
+            Task.new,
+            :position,
+            Struct.new(:size, :scope).new(0, nil)
+          )
         }
         let(:prev_target) { Task.build(position: 'a0') }
         let(:next_target) { Task.build(position: 'a2') }
@@ -318,8 +405,11 @@ describe Narabikae::Position do
         }
 
         let(:position) {
-          described_class
-            .new(Task.new, :position, Struct.new(:size).new(10))
+          described_class.new(
+            Task.new,
+            :position,
+            Struct.new(:size, :scope).new(10, nil)
+          )
         }
         let(:prev_target) { Task.build(position: 'a0') }
         let(:next_target) { Task.build(position: 'a2') }
@@ -342,10 +432,12 @@ describe Narabikae::Position do
   describe 'private #current_first_position' do
     subject { position.send(:current_first_position) }
 
-    let(:position) { described_class.new(Task.new, :position, {}) }
+    let(:position) {
+      described_class.new(Task.new, :position, Struct.new(:scope).new(nil))
+    }
 
     context 'when DB table is empty' do
-      it { is_expected.to eq(nil) }
+      it { is_expected.to be_nil }
     end
 
     context 'when DB table has records' do
@@ -355,6 +447,56 @@ describe Narabikae::Position do
       end
 
       it { is_expected.to eq('Z91111') }
+    end
+
+    context 'when option has scope' do
+      let(:position) {
+        described_class
+          .new(Task.new(user_id: 1), :position, Struct.new(:scope).new(%i[user_id]))
+      }
+
+      before do
+        Task.create!(user_id: 1, position: 'a9')
+        Task.create!(user_id: 2, position: 'a1')
+      end
+
+      it { is_expected.to eq('a9') }
+    end
+  end
+
+  describe 'private #current_last_position' do
+    subject { position.send(:current_last_position) }
+
+    let(:position) {
+      described_class.new(Task.new, :position, Struct.new(:scope).new(nil))
+    }
+
+    context 'when DB table is empty' do
+      it { is_expected.to be_nil }
+    end
+
+    context 'when DB table has records' do
+      before do
+        Task.create!(position: 'a0')
+        Task.create!(position: 'Z91111')
+      end
+
+      it { is_expected.to eq('a0') }
+    end
+
+    context 'when option has scope' do
+      let(:position) {
+        described_class
+          .new(Task.new(user_id: 1), :position, Struct.new(:scope).new(%i[user_id]))
+      }
+
+      before do
+        Task.create!(user_id: 1, position: 'a9')
+        Task.create!(user_id: 1, position: 'a8')
+        Task.create!(user_id: 2, position: 'a1')
+      end
+
+      it { is_expected.to eq('a9') }
     end
   end
 
@@ -385,11 +527,39 @@ describe Narabikae::Position do
     end
   end
 
+  describe 'private #model_scope' do
+    subject { position.send(:model_scope) }
+
+    context "option's scope is nil" do
+      let(:position) {
+        described_class.new(Task.new, :position, Struct.new(:scope).new(nil))
+      }
+
+      it { is_expected.to eq Task.where({}) }
+    end
+
+    context "option's scope include invalid value" do
+      let(:position) {
+        described_class.new(Task.new, :position, Struct.new(:scope).new([ :invalid ]))
+      }
+
+      it { expect { subject }.to raise_error(NoMethodError).with_message("undefined method `invalid' for an instance of Task") }
+    end
+
+    context 'option has valid scope' do
+      let(:position) {
+        described_class.new(Task.new(id: 1, name: 'hello'), :position, Struct.new(:scope).new(%i[id name]))
+      }
+
+      it { is_expected.to eq Task.where(id: 1, name: 'hello') }
+    end
+  end
+
   describe 'private #uniq?' do
     subject { position.send(:uniq?, key) }
 
     let(:position) {
-      described_class.new(Task.new, :position, {})
+      described_class.new(Task.new, :position, Struct.new(:scope).new(nil))
     }
     let(:key) { 'a1' }
 
@@ -404,14 +574,31 @@ describe Narabikae::Position do
     context 'when key is not in use' do
       it { is_expected.to eq(true) }
     end
+
+    context 'when option has scope' do
+      let(:position) {
+        described_class.new(Task.new(user_id: 1), :position, Struct.new(:scope).new(%i[user_id]))
+      }
+      let(:key) { 'a1' }
+
+      before do
+        Task.create!(user_id: 1, position: 'a0')
+        Task.create!(user_id: 2, position: key)
+      end
+
+      it { is_expected.to eq(true) }
+    end
   end
 
   describe 'private #valid?' do
     subject { position.send(:valid?, key) }
 
     let(:position) {
-      described_class
-        .new(Task.new, :position, Struct.new(:size).new(10))
+      described_class.new(
+        Task.new,
+        :position,
+        Struct.new(:size, :scope).new(10, nil)
+      )
     }
 
     context 'when key is nil' do
