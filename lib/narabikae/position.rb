@@ -3,11 +3,9 @@ module Narabikae
     # Initializes a new instance of the Position class.
     #
     # @param record  [Object] Active Record object.
-    # @param column [Symbol] The column symbol. ex: :position
     # @param option [Option]
-    def initialize(record, column, option)
+    def initialize(record, option)
       @record = record
-      @column = column
       @option = option
     end
 
@@ -23,7 +21,7 @@ module Narabikae
     # a new key is generated until the challenge count reaches the limit.
     # challenge count is 10 by default.
     #
-    # @param target [#send(column)]
+    # @param target [#send(field)]
     # @param args [Hash] Additional arguments.
     # @option args [Integer] :challenge The number of times to attempt finding a valid position.
     # @return [String, nil] The generated key for the position after the target, or nil if no valid position is found.
@@ -31,7 +29,7 @@ module Narabikae
       merged_args = { challenge: 10 }.merge(args)
       # when target is nil, try to generate key from the last position
       key = FractionalIndexer.generate_key(
-              prev_key: target&.send(column) || current_last_position
+              prev_key: target&.send(option.field) || current_last_position
             )
       return key if valid?(key)
 
@@ -55,7 +53,7 @@ module Narabikae
     #   position = Position.new
     #   position.find_position_before(target, challenge: 5)
     #
-    # @param target [#send(column)]
+    # @param target [#send(field)]
     # @param args [Hash] Additional arguments.
     # @option args [Integer] :challenge The number of times to attempt finding a valid position.
     # @return [String, nil] The generated key for the position before the target, or nil if no valid position is found.
@@ -63,7 +61,7 @@ module Narabikae
       merged_args = { challenge: 10 }.merge(args)
       # when target is nil, try to generate key from the first position
       key = FractionalIndexer.generate_key(
-              next_key: target&.send(column) || current_first_position
+              next_key: target&.send(option.field) || current_first_position
             )
       return key if valid?(key)
 
@@ -79,8 +77,8 @@ module Narabikae
 
     # Finds the position between two targets.
     #
-    # @param prev_target [#send(column)] The previous target.
-    # @param next_target [#send(column)] The next target.
+    # @param prev_target [#send(field)] The previous target.
+    # @param next_target [#send(field)] The next target.
     # @param args [Hash] Additional arguments.
     # @option args [Integer] :challenge The number of times to attempt finding a valid position.
     # @return [string, nil] The position between the two targets, or nil if no valid position is found.
@@ -90,7 +88,7 @@ module Narabikae
 
       merged_args = { challenge: 10 }.merge(args)
 
-      prev_key, next_key = [ prev_target.send(column), next_target.send(column) ].minmax
+      prev_key, next_key = [ prev_target.send(option.field), next_target.send(option.field) ].minmax
       key = FractionalIndexer.generate_key(
               prev_key: prev_key,
               next_key: next_key,
@@ -109,18 +107,18 @@ module Narabikae
 
     private
 
-    attr_reader :record, :column, :option
+    attr_reader :record, :option
 
     def capable?(key)
       option.key_max_size >= key.size
     end
 
     def current_first_position
-      model.merge(model_scope).minimum(column)
+      model.merge(model_scope).minimum(option.field)
     end
 
     def current_last_position
-      model.merge(model_scope).maximum(column)
+      model.merge(model_scope).maximum(option.field)
     end
 
     def model
@@ -141,7 +139,7 @@ module Narabikae
     end
 
     def uniq?(key)
-      model.where(column => key).merge(model_scope).empty?
+      model.where(option.field => key).merge(model_scope).empty?
     end
 
     def valid?(key)

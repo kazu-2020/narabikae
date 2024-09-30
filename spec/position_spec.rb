@@ -7,8 +7,10 @@ describe Narabikae::Position do
     let(:position) {
       described_class.new(
         Task.new,
-        :position,
-        Narabikae::Option.new(key_max_size: 30)
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 30
+        )
       )
     }
 
@@ -30,8 +32,11 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new(user_id: 1),
-          :position,
-          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30,
+            scope: %i[user_id]
+          )
         )
       }
 
@@ -50,8 +55,10 @@ describe Narabikae::Position do
     let(:position) {
       described_class.new(
         Task.new,
-        :position,
-        Narabikae::Option.new(key_max_size: 30)
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 30
+        )
       )
     }
 
@@ -89,8 +96,10 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new,
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
 
@@ -109,8 +118,10 @@ describe Narabikae::Position do
         let(:position) {
           described_class.new(
             Task.new,
-            :position,
-            Narabikae::Option.new(key_max_size: 0)
+            Narabikae::Option.new(
+              field: :position,
+              key_max_size: 0
+            )
           )
         }
         let(:target) { Task.build(position: 'a1') }
@@ -130,8 +141,10 @@ describe Narabikae::Position do
         let(:position) {
           described_class.new(
             Task.new,
-            :position,
-            Narabikae::Option.new(key_max_size: 0)
+            Narabikae::Option.new(
+              field: :position,
+              key_max_size: 0
+            )
           )
         }
 
@@ -154,8 +167,11 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new(user_id: 1),
-          :position,
-          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30,
+            scope: %i[user_id]
+          )
         )
       }
       let(:target) { Task.build(position: 'a0') }
@@ -174,8 +190,10 @@ describe Narabikae::Position do
     let(:position) {
       described_class.new(
         Task.new,
-        :position,
-        Narabikae::Option.new(key_max_size: 30)
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 30
+        )
       )
     }
 
@@ -221,8 +239,10 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new,
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
 
@@ -241,8 +261,10 @@ describe Narabikae::Position do
         let(:position) {
           described_class.new(
             Task.new,
-            :position,
-            Narabikae::Option.new(key_max_size: 0)
+            Narabikae::Option.new(
+              field: :position,
+              key_max_size: 0
+            )
           )
         }
         let(:target) { Task.build(position: 'a1') }
@@ -260,8 +282,10 @@ describe Narabikae::Position do
         let(:position) {
           described_class.new(
             Task.new,
-            :position,
-            Narabikae::Option.new(key_max_size: 0)
+            Narabikae::Option.new(
+              field: :position,
+              key_max_size: 0
+            )
           )
         }
         let(:target) { Task.build(position: 'a1') }
@@ -283,8 +307,11 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new(user_id: 1),
-          :position,
-          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30,
+            scope: %i[user_id]
+          )
         )
       }
       let(:target) { Task.build(position: 'a1') }
@@ -306,8 +333,10 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new,
-          :position,
-          Narabikae::Option.new(key_max_size: 30)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
         )
       }
       let(:prev_target) { nil }
@@ -330,8 +359,10 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new,
-          :position,
-          Narabikae::Option.new(key_max_size: 30)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
         )
       }
       let(:prev_target) { Task.build(position: 'a0') }
@@ -354,8 +385,10 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new,
-          :position,
-          Narabikae::Option.new(key_max_size: 30)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
         )
       }
       let(:prev_target) { Task.build(position: 'a1') }
@@ -369,8 +402,10 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new,
-          :position,
-          Narabikae::Option.new(key_max_size: 30)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
         )
       }
       let(:prev_target) { Task.build(position: 'invalid') }
@@ -384,8 +419,10 @@ describe Narabikae::Position do
         let(:position) {
           described_class.new(
             Task.new,
-            :position,
-            Narabikae::Option.new(key_max_size: 10)
+            Narabikae::Option.new(
+              field: :position,
+              key_max_size: 10
+            )
           )
         }
         let(:prev_target) { Task.build(position: 'a0') }
@@ -403,8 +440,10 @@ describe Narabikae::Position do
         let(:position) {
           described_class.new(
             Task.new,
-            :position,
-            Narabikae::Option.new(key_max_size: 0)
+            Narabikae::Option.new(
+              field: :position,
+              key_max_size: 0
+            )
           )
         }
         let(:prev_target) { Task.build(position: 'a0') }
@@ -422,8 +461,10 @@ describe Narabikae::Position do
         let(:position) {
           described_class.new(
             Task.new,
-            :position,
-            Narabikae::Option.new(key_max_size: 0)
+            Narabikae::Option.new(
+              field: :position,
+              key_max_size: 0
+            )
           )
         }
         let(:prev_target) { Task.build(position: 'a0') }
@@ -450,8 +491,10 @@ describe Narabikae::Position do
     let(:position) {
       described_class.new(
         Task.new,
-        :position,
-        Narabikae::Option.new(key_max_size: 30)
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 30
+        )
       )
     }
 
@@ -472,8 +515,11 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new(user_id: 1),
-          :position,
-          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30,
+            scope: %i[user_id]
+          )
         )
       }
 
@@ -492,8 +538,10 @@ describe Narabikae::Position do
     let(:position) {
       described_class.new(
         Task.new,
-        :position,
-        Narabikae::Option.new(key_max_size: 30)
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 30
+        )
       )
     }
 
@@ -514,8 +562,11 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new(user_id: 1),
-          :position,
-          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30,
+            scope: %i[user_id]
+          )
         )
       }
 
@@ -536,8 +587,10 @@ describe Narabikae::Position do
     let(:position) {
       described_class.new(
         Task.new,
-        :position,
-        Narabikae::Option.new(key_max_size: 10)
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 10
+        )
       )
     }
 
@@ -567,8 +620,10 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new,
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
 
@@ -579,8 +634,11 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new,
-          :position,
-          Narabikae::Option.new(key_max_size: 10, scope: [ :invalid ])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10,
+            scope: [ :invalid ]
+          )
         )
       }
 
@@ -591,8 +649,11 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new(id: 1, name: 'hello'),
-          :position,
-          Narabikae::Option.new(key_max_size: 10, scope: %i[id name])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10,
+            scope: %i[id name]
+          )
         )
       }
 
@@ -606,8 +667,10 @@ describe Narabikae::Position do
     let(:position) {
       described_class.new(
         Task.new,
-        :position,
-        Narabikae::Option.new(key_max_size: 10)
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 10
+        )
       )
     }
     let(:key) { 'a1' }
@@ -628,8 +691,11 @@ describe Narabikae::Position do
       let(:position) {
         described_class.new(
           Task.new(user_id: 1),
-          :position,
-          Narabikae::Option.new(key_max_size: 10, scope: %i[user_id])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10,
+            scope: %i[user_id]
+          )
         )
       }
       let(:key) { 'a1' }
@@ -649,8 +715,10 @@ describe Narabikae::Position do
     let(:position) {
       described_class.new(
         Task.new,
-        :position,
-        Narabikae::Option.new(key_max_size: 10)
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 10
+        )
       )
     }
 

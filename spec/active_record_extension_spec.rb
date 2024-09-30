@@ -8,8 +8,10 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           Task.build(position: 'invalid'),
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
 
@@ -20,8 +22,10 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           Task.create(position: 'a0'),
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
 
@@ -32,8 +36,11 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           Task.create(position: 'a0'),
-          :position,
-          Narabikae::Option.new(key_max_size: 10, scope: %i[user_id])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10,
+            scope: %i[user_id]
+          )
         )
       }
 
@@ -44,8 +51,11 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           record,
-          :position,
-          Narabikae::Option.new(key_max_size: 10, scope: %i[user_id])
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10,
+            scope: %i[user_id]
+          )
         )
       }
       let(:record) { Task.create(position: 'a0') }
@@ -76,8 +86,10 @@ describe Narabikae::ActiveRecordExtension do
     let(:instance) {
       described_class.new(
         record,
-        :position,
-        Narabikae::Option.new(key_max_size: 10)
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 10
+        )
       )
     }
 
@@ -91,8 +103,10 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           current,
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
       let(:current) { Task.create(position: 'a0') }
@@ -107,8 +121,10 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           current,
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
       let(:current) { Task.create(position: 'a0') }
@@ -126,8 +142,10 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           current,
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
       let(:current) { Task.create(position: 'a0') }
@@ -141,8 +159,10 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           current,
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
       let(:current) { Task.create(position: 'a0') }
@@ -160,8 +180,10 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           current,
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
       let(:current) { Task.create(position: 'a0') }
@@ -176,8 +198,10 @@ describe Narabikae::ActiveRecordExtension do
       let(:instance) {
         described_class.new(
           current,
-          :position,
-          Narabikae::Option.new(key_max_size: 10)
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
         )
       }
       let(:current) { Task.create(position: 'a0') }
