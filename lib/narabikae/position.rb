@@ -4,7 +4,7 @@ module Narabikae
     #
     # @param record  [Object] Active Record object.
     # @param column [Symbol] The column symbol. ex: :position
-    # @param option [Option] this is a Option struct object
+    # @param option [Option]
     def initialize(record, column, option)
       @record = record
       @column = column
@@ -112,7 +112,7 @@ module Narabikae
     attr_reader :record, :column, :option
 
     def capable?(key)
-      option.size >= key.size
+      option.key_max_size >= key.size
     end
 
     def current_first_position
@@ -137,8 +137,7 @@ module Narabikae
     end
 
     def model_scope
-      option_scope = option.scope.is_a?(Array) ? option.scope : []
-      model.where(record.slice(*option_scope))
+      model.where(record.slice(*option.scope))
     end
 
     def uniq?(key)

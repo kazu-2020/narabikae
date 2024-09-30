@@ -8,7 +8,7 @@ describe Narabikae::Position do
       described_class.new(
         Task.new,
         :position,
-        Struct.new(:size, :scope).new(30, nil)
+        Narabikae::Option.new(key_max_size: 30)
       )
     }
 
@@ -31,7 +31,7 @@ describe Narabikae::Position do
         described_class.new(
           Task.new(user_id: 1),
           :position,
-          Struct.new(:size, :scope).new(30, %i[user_id])
+          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
         )
       }
 
@@ -51,7 +51,7 @@ describe Narabikae::Position do
       described_class.new(
         Task.new,
         :position,
-        Struct.new(:size, :scope).new(30, nil)
+        Narabikae::Option.new(key_max_size: 30)
       )
     }
 
@@ -90,7 +90,7 @@ describe Narabikae::Position do
         described_class.new(
           Task.new,
           :position,
-          Struct.new(:size, :scope).new(10, nil)
+          Narabikae::Option.new(key_max_size: 10)
         )
       }
 
@@ -107,7 +107,11 @@ describe Narabikae::Position do
       context 'when all generated keys are invalid' do
         # size is 0 so that the key is invalid
         let(:position) {
-          described_class.new(Task.new, :position, Struct.new(:size).new(0))
+          described_class.new(
+            Task.new,
+            :position,
+            Narabikae::Option.new(key_max_size: 0)
+          )
         }
         let(:target) { Task.build(position: 'a1') }
 
@@ -120,12 +124,15 @@ describe Narabikae::Position do
 
       context 'when challenge is nil or 0' do
         subject {
-          position
-            .find_position_after(target, challenge: 0)
+          position.find_position_after(target, challenge: 0)
         }
 
         let(:position) {
-          described_class.new(Task.new, :position, Struct.new(:size).new(0))
+          described_class.new(
+            Task.new,
+            :position,
+            Narabikae::Option.new(key_max_size: 0)
+          )
         }
 
         let(:target) { Task.build(position: 'a1') }
@@ -148,7 +155,7 @@ describe Narabikae::Position do
         described_class.new(
           Task.new(user_id: 1),
           :position,
-          Struct.new(:size, :scope).new(30, %i[user_id])
+          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
         )
       }
       let(:target) { Task.build(position: 'a0') }
@@ -168,7 +175,7 @@ describe Narabikae::Position do
       described_class.new(
         Task.new,
         :position,
-        Struct.new(:size, :scope).new(30, nil)
+        Narabikae::Option.new(key_max_size: 30)
       )
     }
 
@@ -215,7 +222,7 @@ describe Narabikae::Position do
         described_class.new(
           Task.new,
           :position,
-          Struct.new(:size, :scope).new(10, nil)
+          Narabikae::Option.new(key_max_size: 10)
         )
       }
 
@@ -232,7 +239,11 @@ describe Narabikae::Position do
       context 'when all generated keys are invalid' do
         # size is 0 so that the key is invalid
         let(:position) {
-          described_class.new(Task.new, :position, Struct.new(:size).new(0))
+          described_class.new(
+            Task.new,
+            :position,
+            Narabikae::Option.new(key_max_size: 0)
+          )
         }
         let(:target) { Task.build(position: 'a1') }
 
@@ -247,7 +258,11 @@ describe Narabikae::Position do
         subject { position.find_position_before(target, challenge: 0) }
 
         let(:position) {
-          described_class.new(Task.new, :position, Struct.new(:size).new(0))
+          described_class.new(
+            Task.new,
+            :position,
+            Narabikae::Option.new(key_max_size: 0)
+          )
         }
         let(:target) { Task.build(position: 'a1') }
 
@@ -269,7 +284,7 @@ describe Narabikae::Position do
         described_class.new(
           Task.new(user_id: 1),
           :position,
-          Struct.new(:size, :scope).new(30, %i[user_id])
+          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
         )
       }
       let(:target) { Task.build(position: 'a1') }
@@ -292,7 +307,7 @@ describe Narabikae::Position do
         described_class.new(
           Task.new,
           :position,
-          Struct.new(:size, :scope).new(30, nil)
+          Narabikae::Option.new(key_max_size: 30)
         )
       }
       let(:prev_target) { nil }
@@ -316,7 +331,7 @@ describe Narabikae::Position do
         described_class.new(
           Task.new,
           :position,
-          Struct.new(:size, :scope).new(30, nil)
+          Narabikae::Option.new(key_max_size: 30)
         )
       }
       let(:prev_target) { Task.build(position: 'a0') }
@@ -340,7 +355,7 @@ describe Narabikae::Position do
         described_class.new(
           Task.new,
           :position,
-          Struct.new(:size, :scope).new(30, nil)
+          Narabikae::Option.new(key_max_size: 30)
         )
       }
       let(:prev_target) { Task.build(position: 'a1') }
@@ -355,7 +370,7 @@ describe Narabikae::Position do
         described_class.new(
           Task.new,
           :position,
-          Struct.new(:size, :scope).new(30, nil)
+          Narabikae::Option.new(key_max_size: 30)
         )
       }
       let(:prev_target) { Task.build(position: 'invalid') }
@@ -370,7 +385,7 @@ describe Narabikae::Position do
           described_class.new(
             Task.new,
             :position,
-            Struct.new(:size, :scope).new(10, nil)
+            Narabikae::Option.new(key_max_size: 10)
           )
         }
         let(:prev_target) { Task.build(position: 'a0') }
@@ -389,7 +404,7 @@ describe Narabikae::Position do
           described_class.new(
             Task.new,
             :position,
-            Struct.new(:size, :scope).new(0, nil)
+            Narabikae::Option.new(key_max_size: 0)
           )
         }
         let(:prev_target) { Task.build(position: 'a0') }
@@ -408,7 +423,7 @@ describe Narabikae::Position do
           described_class.new(
             Task.new,
             :position,
-            Struct.new(:size, :scope).new(10, nil)
+            Narabikae::Option.new(key_max_size: 0)
           )
         }
         let(:prev_target) { Task.build(position: 'a0') }
@@ -433,7 +448,11 @@ describe Narabikae::Position do
     subject { position.send(:current_first_position) }
 
     let(:position) {
-      described_class.new(Task.new, :position, Struct.new(:scope).new(nil))
+      described_class.new(
+        Task.new,
+        :position,
+        Narabikae::Option.new(key_max_size: 30)
+      )
     }
 
     context 'when DB table is empty' do
@@ -451,8 +470,11 @@ describe Narabikae::Position do
 
     context 'when option has scope' do
       let(:position) {
-        described_class
-          .new(Task.new(user_id: 1), :position, Struct.new(:scope).new(%i[user_id]))
+        described_class.new(
+          Task.new(user_id: 1),
+          :position,
+          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
+        )
       }
 
       before do
@@ -468,7 +490,11 @@ describe Narabikae::Position do
     subject { position.send(:current_last_position) }
 
     let(:position) {
-      described_class.new(Task.new, :position, Struct.new(:scope).new(nil))
+      described_class.new(
+        Task.new,
+        :position,
+        Narabikae::Option.new(key_max_size: 30)
+      )
     }
 
     context 'when DB table is empty' do
@@ -486,8 +512,11 @@ describe Narabikae::Position do
 
     context 'when option has scope' do
       let(:position) {
-        described_class
-          .new(Task.new(user_id: 1), :position, Struct.new(:scope).new(%i[user_id]))
+        described_class.new(
+          Task.new(user_id: 1),
+          :position,
+          Narabikae::Option.new(key_max_size: 30, scope: %i[user_id])
+        )
       }
 
       before do
@@ -505,7 +534,11 @@ describe Narabikae::Position do
     subject { position.send(:capable?, key) }
 
     let(:position) {
-      described_class.new(Task.new, :position, Struct.new(:size).new(10))
+      described_class.new(
+        Task.new,
+        :position,
+        Narabikae::Option.new(key_max_size: 10)
+      )
     }
 
     context 'when key is less than' do
@@ -530,9 +563,13 @@ describe Narabikae::Position do
   describe 'private #model_scope' do
     subject { position.send(:model_scope) }
 
-    context "option's scope is nil" do
+    context "option's scope is []" do
       let(:position) {
-        described_class.new(Task.new, :position, Struct.new(:scope).new(nil))
+        described_class.new(
+          Task.new,
+          :position,
+          Narabikae::Option.new(key_max_size: 10)
+        )
       }
 
       it { is_expected.to eq Task.where({}) }
@@ -540,7 +577,11 @@ describe Narabikae::Position do
 
     context "option's scope include invalid value" do
       let(:position) {
-        described_class.new(Task.new, :position, Struct.new(:scope).new([ :invalid ]))
+        described_class.new(
+          Task.new,
+          :position,
+          Narabikae::Option.new(key_max_size: 10, scope: [ :invalid ])
+        )
       }
 
       it { expect { subject }.to raise_error(NoMethodError).with_message("undefined method `invalid' for an instance of Task") }
@@ -548,7 +589,11 @@ describe Narabikae::Position do
 
     context 'option has valid scope' do
       let(:position) {
-        described_class.new(Task.new(id: 1, name: 'hello'), :position, Struct.new(:scope).new(%i[id name]))
+        described_class.new(
+          Task.new(id: 1, name: 'hello'),
+          :position,
+          Narabikae::Option.new(key_max_size: 10, scope: %i[id name])
+        )
       }
 
       it { is_expected.to eq Task.where(id: 1, name: 'hello') }
@@ -559,7 +604,11 @@ describe Narabikae::Position do
     subject { position.send(:uniq?, key) }
 
     let(:position) {
-      described_class.new(Task.new, :position, Struct.new(:scope).new(nil))
+      described_class.new(
+        Task.new,
+        :position,
+        Narabikae::Option.new(key_max_size: 10)
+      )
     }
     let(:key) { 'a1' }
 
@@ -577,7 +626,11 @@ describe Narabikae::Position do
 
     context 'when option has scope' do
       let(:position) {
-        described_class.new(Task.new(user_id: 1), :position, Struct.new(:scope).new(%i[user_id]))
+        described_class.new(
+          Task.new(user_id: 1),
+          :position,
+          Narabikae::Option.new(key_max_size: 10, scope: %i[user_id])
+        )
       }
       let(:key) { 'a1' }
 
@@ -597,7 +650,7 @@ describe Narabikae::Position do
       described_class.new(
         Task.new,
         :position,
-        Struct.new(:size, :scope).new(10, nil)
+        Narabikae::Option.new(key_max_size: 10)
       )
     }
 
