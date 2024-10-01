@@ -27,7 +27,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = [ 'lib' ]
 
   spec.add_dependency 'fractional_indexer', '>= 0.4.0'
-  spec.add_dependency 'rails', '~> 7.1', '>= 7.1.3.2'
+  spec.add_dependency 'activerecord'
+  spec.add_dependency 'activesupport'
 
   spec.add_development_dependency 'rspec-rails', '>= 5.0.0'
   spec.add_development_dependency 'rubocop-rails-omakase'
