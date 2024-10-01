@@ -11,7 +11,7 @@ module Narabikae
       # check valid key for fractional_indexer
       # when invalid key, raise FractionalIndexer::Error
       FractionalIndexer.generate_key(prev_key: record.send(option.field))
-      option.scope.any? { |scope| record.will_save_change_to_attribute?(scope) } && !record.will_save_change_to_attribute?(option.field)
+      option.scope.any? { |s| record.will_save_change_to_attribute?(s) } && !record.will_save_change_to_attribute?(option.field)
     rescue FractionalIndexer::Error
       true
     end

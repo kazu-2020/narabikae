@@ -2,11 +2,15 @@ require "narabikae/version"
 
 require "narabikae/active_record_extension"
 require "narabikae/configuration"
+require "narabikae/option"
+require "narabikae/option_store"
 require "narabikae/position"
 
 require "fractional_indexer"
 
 module Narabikae
+  class Error < StandardError; end
+
   @configuration = Narabikae::Configuration.new
 
   def self.configure
@@ -22,35 +26,43 @@ module Narabikae
   module Extension
     extend ActiveSupport::Concern
 
-    Option = Struct.new("Option", :size, :scope)
-
     class_methods do
-      def narabikae(column = :position, size:, scope: [])
-        column = column.to_sym
-
-        narabikae_column_store[column] = Option.new(size, scope)
+      def narabikae(field = :position, size:, scope: [])
+        option = narabikae_option_store.register!(
+                   field.to_sym,
+                   Narabikae::Option.new(field: field, key_max_size: size, scope: scope)
+                 )
 
         before_create do
-          Narabikae::ActiveRecordExtension.new(self, column, Option.new(size)).set_position
+          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension.set_position
         end
 
-        define_method :"move_to_#{column}_after" do |target, **args|
-          Narabikae::ActiveRecordExtension.new(self, column, Option.new(size)).move_to_after(target, **args)
+        before_update do
+          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension.set_position if extension.auto_set_position?
         end
 
-        define_method :"move_to_#{column}_before" do |target, **args|
-          Narabikae::ActiveRecordExtension.new(self, column, Option.new(size)).move_to_before(target, **args)
+        define_method :"move_to_#{field}_after" do |target, **args|
+          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension.move_to_after(target, **args)
         end
 
-        define_method :"move_to_#{column}_between" do |prev_target, next_target, **args|
-          Narabikae::ActiveRecordExtension.new(self, column, Option.new(size)).move_to_between(prev_target, next_target, **args)
+        define_method :"move_to_#{field}_before" do |target, **args|
+          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension.move_to_before(target, **args)
+        end
+
+        define_method :"move_to_#{field}_between" do |prev_target, next_target, **args|
+          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension.move_to_between(prev_target, next_target, **args)
         end
       end
 
       private
 
-      def narabikae_column_store
-        @_narabikae_column_store ||= {}
+      def narabikae_option_store
+        @_narabikae_option_store ||= Narabikae::OptionStore.new
       end
     end
   end
