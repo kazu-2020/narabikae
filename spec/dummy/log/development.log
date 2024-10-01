@@ -1,2 +1,0 @@
-  [1m[35m (27.7ms)[0m  [1m[35mCREATE DATABASE `narabikae_development` DEFAULT CHARACTER SET `utf8mb4`[0m
-  [1m[35m (4.4ms)[0m  [1m[35mCREATE DATABASE `narabikae_test` DEFAULT CHARACTER SET `utf8mb4`[0m

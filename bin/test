@@ -1,7 +1,0 @@
-#!/usr/bin/env ruby
-require "bundler/setup"
-
-Dir.chdir(File.expand_path('../test/dummy', __dir__))
-
-args = ARGV.join(' ')
-system("bundle exec rspec #{args}")
