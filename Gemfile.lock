@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    narabikae (0.1.0)
+    narabikae (0.2.0)
       activerecord
       activesupport
       fractional_indexer
