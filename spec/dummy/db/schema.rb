@@ -17,8 +17,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_28_051832) do
     t.string "position", limit: 500, null: false, collation: "ascii_bin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "course_id", "position" ], name: "index_chapters_on_course_id_and_position", unique: true
-    t.index [ "course_id" ], name: "index_chapters_on_course_id"
+    t.index ["course_id", "position"], name: "index_chapters_on_course_id_and_position", unique: true
+    t.index ["course_id"], name: "index_chapters_on_course_id"
   end
 
   create_table "courses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -39,7 +39,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_28_051832) do
     t.string "position", limit: 500, null: false, collation: "ascii_bin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "position" ], name: "index_tasks_on_position", unique: true
+    t.index ["position"], name: "index_tasks_on_position", unique: true
   end
 
   add_foreign_key "chapters", "courses"
