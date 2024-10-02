@@ -7,6 +7,8 @@ require "narabikae/option_store"
 require "narabikae/position"
 
 require "fractional_indexer"
+require "active_support"
+require "active_record"
 
 module Narabikae
   class Error < StandardError; end
