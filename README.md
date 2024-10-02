@@ -83,7 +83,8 @@ Task.order(:position).pluck(:name, :position)
 
 ```
 
-Note: The position is set using the before_create callback. Therefore, do not define validations such as presence on the attributes managed by this gem!
+> [!NOTE]
+> The position is set using the before_create callback. Therefore, do not define validations such as presence on the attributes managed by this gem!
 
 ## Usage Details
 
@@ -206,9 +207,8 @@ If you want to increase the number of retries, you can use the "challenge" optio
 ticket.move_to_position_between(t1, t2, challenge: 15)
 ```
 
-Note:
-
-Currently, if two users write to the database at exactly the same time, the system may not detect the duplicate positions, and the process will continue without error. This issue will be revisited if there is demand for a more robust solution in the future.
+> [!NOTE]
+> Currently, if two users write to the database at exactly the same time, the system may not detect the duplicate positions, and the process will continue without error. This issue will be revisited if there is demand for a more robust solution in the future.
 
 ## Questions, Feedback
 
