@@ -11,8 +11,8 @@ describe 'Callbacks' do
         Chapter.narabikae :position, size: 500, scope: %i[course_id]
       end
 
-      let(:course_a) { Course.build(name: 'Course A') }
-      let(:course_b) { Course.build(name: 'Course B') }
+      let(:course_a) { Course.new(name: 'Course A') }
+      let(:course_b) { Course.new(name: 'Course B') }
 
       before do
         ActiveRecord::Base.transaction do

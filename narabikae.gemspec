@@ -30,7 +30,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activerecord'
   spec.add_dependency 'activesupport'
 
-  spec.add_development_dependency 'rspec-rails', '>= 5.0.0'
+  spec.add_development_dependency 'rspec-rails'
   spec.add_development_dependency 'rubocop-rails-omakase'
   spec.add_development_dependency 'rubocop-rspec'
+  spec.add_development_dependency "appraisal"
 end

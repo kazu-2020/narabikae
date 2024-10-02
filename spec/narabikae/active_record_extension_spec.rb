@@ -7,7 +7,7 @@ describe Narabikae::ActiveRecordExtension do
     context 'when record has invalid key' do
       let(:instance) {
         described_class.new(
-          Task.build(position: 'invalid'),
+          Task.new(position: 'invalid'),
           Narabikae::Option.new(
             field: :position,
             key_max_size: 10
@@ -110,7 +110,7 @@ describe Narabikae::ActiveRecordExtension do
         )
       }
       let(:current) { Task.create(position: 'a0') }
-      let(:target) { Task.build(position: 'invalid') }
+      let(:target) { Task.new(position: 'invalid') }
 
 
       it { expect(subject).to eq false }
@@ -149,7 +149,7 @@ describe Narabikae::ActiveRecordExtension do
         )
       }
       let(:current) { Task.create(position: 'a0') }
-      let(:target) { Task.build(position: 'invalid') }
+      let(:target) { Task.new(position: 'invalid') }
 
       it { expect(subject).to eq false }
       it { expect { subject }.not_to change { current.position } }
@@ -187,8 +187,8 @@ describe Narabikae::ActiveRecordExtension do
         )
       }
       let(:current) { Task.create(position: 'a0') }
-      let(:prev_target) { Task.build(position: 'invalid') }
-      let(:next_target) { Task.build(position: 'invalid') }
+      let(:prev_target) { Task.new(position: 'invalid') }
+      let(:next_target) { Task.new(position: 'invalid') }
 
       it { expect(subject).to eq false }
       it { expect { subject }.not_to change { current.position } }

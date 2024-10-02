@@ -63,13 +63,13 @@ describe Narabikae::Position do
     }
 
     context 'when target has valid position' do
-      let(:target) { Task.build(position: 'a1') }
+      let(:target) { Task.new(position: 'a1') }
 
       it { is_expected.to eq('a2') }
     end
 
     context 'when target has invalid position' do
-      let(:target) { Task.build(position: 'invalid') }
+      let(:target) { Task.new(position: 'invalid') }
 
       it { is_expected.to be_nil }
     end
@@ -104,7 +104,7 @@ describe Narabikae::Position do
       }
 
       context 'when first generated key is invalid' do
-        let(:target) { Task.build(position: 'a1') }
+        let(:target) { Task.new(position: 'a1') }
 
         before do
           Task.create!(position: 'a2')
@@ -124,7 +124,7 @@ describe Narabikae::Position do
             )
           )
         }
-        let(:target) { Task.build(position: 'a1') }
+        let(:target) { Task.new(position: 'a1') }
 
         before do
           Task.create!(position: 'a2')
@@ -148,7 +148,7 @@ describe Narabikae::Position do
           )
         }
 
-        let(:target) { Task.build(position: 'a1') }
+        let(:target) { Task.new(position: 'a1') }
 
         before do
           allow(position).to receive(:random_fractional)
@@ -174,7 +174,7 @@ describe Narabikae::Position do
           )
         )
       }
-      let(:target) { Task.build(position: 'a0') }
+      let(:target) { Task.new(position: 'a0') }
 
       before do
         Task.create!(user_id: 2, position: 'a1')
@@ -198,13 +198,13 @@ describe Narabikae::Position do
     }
 
     context 'when target has valid position' do
-      let(:target) { Task.build(position: 'a0') }
+      let(:target) { Task.new(position: 'a0') }
 
       it { is_expected.to eq('Zz') }
     end
 
     context 'when target has invalid position' do
-      let(:target) { Task.build(position: 'invalid') }
+      let(:target) { Task.new(position: 'invalid') }
 
       it { is_expected.to be_nil }
     end
@@ -247,7 +247,7 @@ describe Narabikae::Position do
       }
 
       context 'when first generated key is invalid' do
-        let(:target) { Task.build(position: 'a1') }
+        let(:target) { Task.new(position: 'a1') }
 
         before do
           Task.create!(position: 'a0')
@@ -267,7 +267,7 @@ describe Narabikae::Position do
             )
           )
         }
-        let(:target) { Task.build(position: 'a1') }
+        let(:target) { Task.new(position: 'a1') }
 
         before do
           Task.create!(position: 'a0')
@@ -288,7 +288,7 @@ describe Narabikae::Position do
             )
           )
         }
-        let(:target) { Task.build(position: 'a1') }
+        let(:target) { Task.new(position: 'a1') }
 
         before do
           allow(position).to receive(:random_fractional)
@@ -314,7 +314,7 @@ describe Narabikae::Position do
           )
         )
       }
-      let(:target) { Task.build(position: 'a1') }
+      let(:target) { Task.new(position: 'a1') }
 
       before do
         Task.create!(user_id: 2, position: 'a0')
@@ -340,7 +340,7 @@ describe Narabikae::Position do
         )
       }
       let(:prev_target) { nil }
-      let(:next_target) { Task.build(position: 'a0') }
+      let(:next_target) { Task.new(position: 'a0') }
 
       before do
         allow(position).to receive(:find_position_before).and_call_original
@@ -365,7 +365,7 @@ describe Narabikae::Position do
           )
         )
       }
-      let(:prev_target) { Task.build(position: 'a0') }
+      let(:prev_target) { Task.new(position: 'a0') }
       let(:next_target) { nil }
 
       before do
@@ -391,8 +391,8 @@ describe Narabikae::Position do
           )
         )
       }
-      let(:prev_target) { Task.build(position: 'a1') }
-      let(:next_target) { Task.build(position: 'a0') }
+      let(:prev_target) { Task.new(position: 'a1') }
+      let(:next_target) { Task.new(position: 'a0') }
 
 
       it { is_expected.to eq('a0V') }
@@ -408,8 +408,8 @@ describe Narabikae::Position do
           )
         )
       }
-      let(:prev_target) { Task.build(position: 'invalid') }
-      let(:next_target) { Task.build(position: 'invalid') }
+      let(:prev_target) { Task.new(position: 'invalid') }
+      let(:next_target) { Task.new(position: 'invalid') }
 
       it { is_expected.to be_nil }
     end
@@ -425,8 +425,8 @@ describe Narabikae::Position do
             )
           )
         }
-        let(:prev_target) { Task.build(position: 'a0') }
-        let(:next_target) { Task.build(position: 'a2') }
+        let(:prev_target) { Task.new(position: 'a0') }
+        let(:next_target) { Task.new(position: 'a2') }
 
         before do
           Task.create(position: 'a1')
@@ -446,8 +446,8 @@ describe Narabikae::Position do
             )
           )
         }
-        let(:prev_target) { Task.build(position: 'a0') }
-        let(:next_target) { Task.build(position: 'a2') }
+        let(:prev_target) { Task.new(position: 'a0') }
+        let(:next_target) { Task.new(position: 'a2') }
 
         it { is_expected.to eq(nil) }
       end
@@ -467,8 +467,8 @@ describe Narabikae::Position do
             )
           )
         }
-        let(:prev_target) { Task.build(position: 'a0') }
-        let(:next_target) { Task.build(position: 'a2') }
+        let(:prev_target) { Task.new(position: 'a0') }
+        let(:next_target) { Task.new(position: 'a2') }
 
         before do
           Task.create(position: 'a1')
