@@ -45,17 +45,17 @@ module Narabikae
           extension.set_position if extension.auto_set_position?
         end
 
-        define_method :"move_to_#{field}_after" do |target, **args|
+        define_method :"move_to_#{field}_after" do |target = nil, **args|
           extension = Narabikae::ActiveRecordExtension.new(self, option)
           extension.move_to_after(target, **args)
         end
 
-        define_method :"move_to_#{field}_before" do |target, **args|
+        define_method :"move_to_#{field}_before" do |target = nil, **args|
           extension = Narabikae::ActiveRecordExtension.new(self, option)
           extension.move_to_before(target, **args)
         end
 
-        define_method :"move_to_#{field}_between" do |prev_target, next_target, **args|
+        define_method :"move_to_#{field}_between" do |prev_target = nil, next_target = nil, **args|
           extension = Narabikae::ActiveRecordExtension.new(self, option)
           extension.move_to_between(prev_target, next_target, **args)
         end
