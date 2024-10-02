@@ -18,7 +18,7 @@ module Narabikae
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    if Rails.version.to_i > 6
+    if Rails.version.to_f >= 7.1
       config.autoload_lib(ignore: %w[assets tasks])
     end
 

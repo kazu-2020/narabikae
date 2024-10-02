@@ -1,5 +1,7 @@
 # Narabikae
 
+[![test](https://github.com/kazu-2020/narabikae/actions/workflows/ci.yaml/badge.svg?branch=main&event=push)](https://github.com/kazu-2020/narabikae/actions/workflows/ci.yaml)
+
 Narabikae(Japanese: 並び替え) means "reorder". Like [acts_as_list](https://github.com/brendon/acts_as_list), this gem provides automatic order management and reordering functionality for your records.
 
 One of the key advantages of this gem is its use of the [fractional indexing algorithm](https://www.figma.com/blog/realtime-editing-of-ordered-sequences/#fractional-indexing), which greatly enhances the efficiency of reordering operations. With Narabikae, regardless of the amount of data, "only a single record" is updated during the reordering process 🎉.

@@ -7,7 +7,7 @@ gemspec
 gem "puma"
 
 gem "mysql2"
-gem "pg"
-gem "sqlite3"
+# gem "pg"
+# gem "sqlite3"
 
 gem "debug", ">= 1.0.0"

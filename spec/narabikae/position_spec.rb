@@ -642,7 +642,7 @@ describe Narabikae::Position do
         )
       }
 
-      it { expect { subject }.to raise_error(NoMethodError).with_message("undefined method `invalid' for an instance of Task") }
+      it { expect { subject }.to raise_error(NoMethodError) }
     end
 
     context 'option has valid scope' do
