@@ -8,3 +8,5 @@
 /spec/dummy/tmp/
 
 /spec/dummy/narabikae_*
+
+.mise.toml
