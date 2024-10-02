@@ -81,7 +81,7 @@ Task.create([
           { name: 'task-3' }
      ])
 Task.order(:position).pluck(:name, :position)
-# => [["task-1", "a0"], ["task-3", "a1"], ["task-1", "a2"]]
+# => [["task-1", "a0"], ["task-2", "a1"], ["task-3", "a2"]]
 
 ```
 
