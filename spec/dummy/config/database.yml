@@ -1,0 +1,30 @@
+<%
+mysql2 = { adapter: 'mysql2', encoding: 'utf8mb4', pool: 5, host: '127.0.0.1', username: 'root', password: 'pass' }
+postgresql = { adapter: 'postgresql', encoding: 'unicode', pool: 5, host: '127.0.0.1', username: 'postgres', password: 'pass' }
+sqlite3 = { adapter: 'sqlite3', pool: 5, timeout: 5000 }
+
+database_config = case ENV['DB_ADAPTER']
+  when 'mysql2' then mysql2
+  when 'postgresql' then postgresql
+  when 'sqlite3' then sqlite3
+  else
+    mysql2
+  end
+%>
+
+default: &default
+  adapter: <%= database_config[:adapter] %>
+  encoding: <%= database_config[:encoding] if database_config[:encoding] %>
+  pool: <%= database_config[:pool] %>
+  host: <%= database_config[:host] if database_config[:host] %>
+  username: <%= database_config[:username] if database_config[:username] %>
+  password: <%= database_config[:password] if database_config[:password] %>
+  timeout: <%= database_config[:timeout] if database_config[:timeout] %>
+
+development:
+  <<: *default
+  database: narabikae_development
+
+test:
+  <<: *default
+  database: narabikae_test
