@@ -150,16 +150,7 @@ describe Narabikae::Position do
 
         let(:target) { Task.new(position: 'a1') }
 
-        before do
-          allow(position).to receive(:find_safe_chars_after)
-        end
-
         it { is_expected.to be_nil }
-
-        it 'does not try to find safe characters' do
-          subject
-          expect(position).not_to have_received(:find_safe_chars_after)
-        end
       end
     end
 
@@ -290,16 +281,7 @@ describe Narabikae::Position do
         }
         let(:target) { Task.new(position: 'a1') }
 
-        before do
-          allow(position).to receive(:find_safe_chars_before)
-        end
-
         it { is_expected.to eq(nil) }
-
-        it 'does not try to find safe characters' do
-          subject
-          expect(position).not_to have_received(:find_safe_chars_before)
-        end
       end
     end
 
@@ -472,15 +454,9 @@ describe Narabikae::Position do
 
         before do
           Task.create(position: 'a1')
-          allow(position).to receive(:find_safe_chars_between)
         end
 
         it { is_expected.to eq(nil) }
-
-        it 'does not retry to find safe characters' do
-          subject
-          expect(position).not_to have_received(:find_safe_chars_between)
-        end
       end
     end
   end
@@ -757,7 +733,7 @@ describe Narabikae::Position do
     end
   end
 
-  describe 'safe character selection for ordering guarantees' do
+  describe 'ordering guarantees with retry approach' do
     describe '#find_position_between with reversed order parameters' do
       let(:position) {
         described_class.new(
@@ -787,7 +763,7 @@ describe Narabikae::Position do
       end
     end
 
-    describe '#find_position_before with safe character selection' do
+    describe '#find_position_before with retry approach' do
       let(:position) {
         described_class.new(
           Task.new,
@@ -798,47 +774,23 @@ describe Narabikae::Position do
         )
       }
 
-      context 'when target position ends with a low character' do
-        let(:target) { Task.new(position: 'a01') }
-
-        it 'demonstrates that most characters would violate ordering' do
-          base_key = FractionalIndexer.generate_key(next_key: 'a01')
-          expect(base_key).to eq('a0')
-
-          violating_chars = FractionalIndexer.configuration.digits[1..].select { |c| base_key + c >= target.position }
-          expect(violating_chars).not_to be_empty
-          expect(violating_chars).to include('2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B')
-        end
-
-        it 'ensures generated key is always less than target with safe character selection' do
-          Task.create!(position: 'a0')
-
-          key = position.find_position_before(target)
-
-          expect(key).to be < target.position
-          expect(key).to eq('a00')
-        end
-      end
-
-      context 'when generated key is already taken' do
+      context 'when the first generated key is invalid' do
         let(:target) { Task.new(position: 'a01') }
 
         before do
           Task.create!(position: 'a0')
         end
 
-        it 'adds safe character that maintains order' do
+        it 'retries with proper boundaries to maintain order' do
           key = position.find_position_before(target)
 
-          expect(key).to start_with('a0')
-          expect(key.length).to be > 2
           expect(key).to be < target.position
-          expect(key).to eq('a00')
+          expect(key).to eq('a00V')  # because 'a0' < 'a00V' < 'a01' is valid
         end
       end
     end
 
-    describe '#find_position_after with safe character selection' do
+    describe '#find_position_after with retry approach' do
       let(:position) {
         described_class.new(
           Task.new,
@@ -849,21 +801,21 @@ describe Narabikae::Position do
         )
       }
 
-      context 'when adding safe character to generated key' do
-        let(:target) { Task.new(position: 'a0') }
+      context 'when generated key needs retry' do
+        let(:target) { Task.new(position: 'z9') }
 
-        it 'always maintains correct order' do
-          base_key = FractionalIndexer.generate_key(prev_key: 'a0')
-          expect(base_key).to eq('a1')
+        before do
+          Task.create!(position: 'zV')
+        end
 
-          FractionalIndexer.configuration.digits[1..].each do |char|
-            expect(base_key + char).to be > target.position
-          end
+        it 'always maintains correct order on retry' do
+          key = position.find_position_after(target)
+          expect(key).to be > target.position
         end
       end
     end
 
-    describe 'demonstrating the complete issue' do
+    describe 'demonstrating the complete solution' do
       let(:position) {
         described_class.new(
           Task.new,
@@ -874,14 +826,14 @@ describe Narabikae::Position do
         )
       }
 
-      it 'ensures safe character selection maintains order with minmax' do
+      it 'ensures retry approach maintains order with minmax' do
         prev = Task.new(position: 'a1')
         nxt = Task.new(position: 'a0')
         Task.create!(position: 'a0V')
 
         key = position.find_position_between(prev, nxt)
 
-        expect(key).to start_with('a0V')
+        expect(key).to start_with('a0')
         expect(key).to be > 'a0'
         expect(key).to be < 'a1'
       end

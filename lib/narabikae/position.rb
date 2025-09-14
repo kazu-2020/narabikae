@@ -32,12 +32,8 @@ module Narabikae
       key = FractionalIndexer.generate_key(prev_key: target_key)
       return key if valid?(key)
 
-      (merged_args[:challenge] || 0).times do
-        safe_chars = find_safe_chars_after(key, target_key)
-        break if safe_chars.empty? # No safe characters available (shouldn't happen for after)
-
-        char = safe_chars.sample
-        key += char
+      (merged_args[:challenge] || 0).times do |i|
+        key = FractionalIndexer.generate_key(prev_key: key)
         return key if valid?(key)
       end
 
@@ -67,12 +63,8 @@ module Narabikae
       key = FractionalIndexer.generate_key(next_key: target_key)
       return key if valid?(key)
 
-      (merged_args[:challenge] || 0).times do
-        safe_chars = find_safe_chars_before(key, target_key)
-        break if safe_chars.empty? # No safe characters available
-
-        char = safe_chars.sample
-        key += char
+      (merged_args[:challenge] || 0).times do |i|
+        key = FractionalIndexer.generate_key(prev_key: key, next_key: target_key)
         return key if valid?(key)
       end
 
@@ -101,12 +93,8 @@ module Narabikae
             )
       return key if valid?(key)
 
-      (merged_args[:challenge] || 0).times do
-        safe_chars = find_safe_chars_between(key, prev_key, next_key)
-        break if safe_chars.empty? # No safe characters available
-
-        char = safe_chars.sample
-        key += char
+      (merged_args[:challenge] || 0).times do |i|
+        key = FractionalIndexer.generate_key(prev_key: key, next_key: next_key)
         return key if valid?(key)
       end
 
@@ -123,70 +111,6 @@ module Narabikae
       option.key_max_size >= key.size
     end
 
-    def find_safe_chars_before(base_key, target_key)
-      # Use digits[1..] to avoid trailing zeros in fractional part
-      digits = FractionalIndexer.configuration.digits[1..]
-
-      # If base_key is already >= target_key, no character can fix this
-      return [] if base_key >= target_key
-
-      # Special case: if we need '0' to maintain order, include it
-      # This happens when base_key + '0' < target_key but base_key + '1' >= target_key
-      if base_key + "0" < target_key && base_key + "1" >= target_key
-        return [ "0" ]
-      end
-
-      # Find the first character that would make base_key + char >= target_key
-      # Since digits are ordered, all characters before this are safe
-      boundary_index = digits.find_index { |char| base_key + char >= target_key }
-
-      if boundary_index.nil?
-        # All characters are safe
-        digits
-      elsif boundary_index == 0
-        # No characters are safe (except possibly '0' handled above)
-        []
-      else
-        # Characters before boundary_index are safe
-        digits[0...boundary_index]
-      end
-    end
-
-    def find_safe_chars_after(base_key, target_key)
-      # For find_position_after, any character maintains order
-      # since base_key > target_key and base_key + char > base_key > target_key
-      # Use digits[1..] to avoid trailing zeros in fractional part
-      FractionalIndexer.configuration.digits[1..]
-    end
-
-    def find_safe_chars_between(base_key, prev_key, next_key)
-      # Use digits[1..] to avoid trailing zeros in fractional part
-      digits = FractionalIndexer.configuration.digits[1..]
-      all_digits = FractionalIndexer.configuration.digits
-
-      # Find minimum character where base_key + char > prev_key
-      min_char_index = all_digits.find_index { |char| base_key + char > prev_key }
-      return [] if min_char_index.nil?
-
-      # Find first character where base_key + char >= next_key
-      max_char_index = all_digits.find_index { |char| base_key + char >= next_key }
-
-      # Special case: if only '0' works, return it
-      if min_char_index == 0 && max_char_index == 1
-        return [ "0" ]
-      end
-
-      # Filter to only include non-zero digits that are in the safe range
-      safe_chars = []
-      digits.each do |char|
-        char_value = all_digits.index(char)
-        if char_value >= min_char_index && (max_char_index.nil? || char_value < max_char_index)
-          safe_chars << char
-        end
-      end
-
-      safe_chars
-    end
 
     def current_first_position
       model.merge(model_scope).minimum(option.field)
