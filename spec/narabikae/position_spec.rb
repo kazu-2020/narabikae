@@ -110,7 +110,7 @@ describe Narabikae::Position do
           Task.create!(position: 'a2')
         end
 
-        it { is_expected.to match(/^a2.$/) }
+        it { is_expected.to eq('a3') }
       end
 
       context 'when all generated keys are invalid' do
@@ -802,15 +802,16 @@ describe Narabikae::Position do
       }
 
       context 'when generated key needs retry' do
-        let(:target) { Task.new(position: 'z9') }
+        let(:target) { Task.new(position: 'aZ') }
 
         before do
-          Task.create!(position: 'zV')
+          Task.create!(position: 'aa')
         end
 
         it 'always maintains correct order on retry' do
           key = position.find_position_after(target)
           expect(key).to be > target.position
+          expect(key).to eq('ab')
         end
       end
     end

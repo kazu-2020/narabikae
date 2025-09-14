@@ -32,9 +32,11 @@ module Narabikae
       key = FractionalIndexer.generate_key(prev_key: target_key)
       return key if valid?(key)
 
+      prev_key = key
       (merged_args[:challenge] || 0).times do |i|
-        key = FractionalIndexer.generate_key(prev_key: key)
+        key = FractionalIndexer.generate_key(prev_key: prev_key)
         return key if valid?(key)
+        prev_key = key
       end
 
       nil
