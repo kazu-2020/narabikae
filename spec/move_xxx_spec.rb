@@ -43,7 +43,12 @@ describe 'move_to_<field>_xxx' do
       let(:target) { Sample.create } # position: 'a1'
 
       it { is_expected.to eq true }
-      it { expect { subject }.to change { current.reload.position }.from('a0').to(/^a0.$/) }
+      it {
+        expect { subject }
+          .to change { current.reload.position }
+          .from('a0')
+          .to(satisfy { |value| value.start_with?('a0V') && value.length == 4 })
+      }
     end
   end
 
@@ -57,7 +62,12 @@ describe 'move_to_<field>_xxx' do
       let(:next_target) { Sample.create } # position: 'a1'
 
       it { is_expected.to eq true }
-      it { expect { subject }.to change { current.reload.position }.from('a0').to(/^a0.$/) }
+      it {
+        expect { subject }
+          .to change { current.reload.position }
+          .from('a0')
+          .to(satisfy { |value| value.start_with?('a0V') && value.length == 4 })
+      }
     end
 
     context 'when next_target is nil' do

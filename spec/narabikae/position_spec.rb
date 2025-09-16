@@ -107,10 +107,15 @@ describe Narabikae::Position do
         let(:target) { Task.new(position: 'a1') }
 
         before do
+          allow(position).to receive(:random_fractional).and_return('C')
           Task.create!(position: 'a2')
         end
 
-        it { is_expected.to eq('a3') }
+        it 'returns a salted key that is still greater than target' do
+          expect(subject).to eq('a1VC')
+          expect(subject).to be > target.position
+          expect(position).to have_received(:random_fractional)
+        end
       end
 
       context 'when all generated keys are invalid' do
@@ -241,10 +246,15 @@ describe Narabikae::Position do
         let(:target) { Task.new(position: 'a1') }
 
         before do
+          allow(position).to receive(:random_fractional).and_return('Z')
           Task.create!(position: 'a0')
         end
 
-        it { is_expected.to match(/^a0.$/) }
+        it 'returns a salted key that still keeps order' do
+          expect(subject).to eq('a0VZ')
+          expect(subject).to be < target.position
+          expect(position).to have_received(:random_fractional)
+        end
       end
 
       context 'when all generated keys are invalid' do
@@ -411,10 +421,16 @@ describe Narabikae::Position do
         let(:next_target) { Task.new(position: 'a2') }
 
         before do
+          allow(position).to receive(:random_fractional).and_return('t')
           Task.create(position: 'a1')
         end
 
-        it { is_expected.to match(/^a1.$/) }
+        it 'returns a salted key that remains between boundaries' do
+          expect(subject).to eq('a1Vt')
+          expect(subject).to be > prev_target.position
+          expect(subject).to be < next_target.position
+          expect(position).to have_received(:random_fractional)
+        end
       end
 
       context 'when all generated keys are invalid' do
@@ -778,6 +794,7 @@ describe Narabikae::Position do
         let(:target) { Task.new(position: 'a01') }
 
         before do
+          allow(position).to receive(:random_fractional).and_return('Z')
           Task.create!(position: 'a0')
         end
 
@@ -785,7 +802,8 @@ describe Narabikae::Position do
           key = position.find_position_before(target)
 
           expect(key).to be < target.position
-          expect(key).to eq('a00V')  # because 'a0' < 'a00V' < 'a01' is valid
+          expect(key).to eq('a00VZ')  # because 'a0' < 'a00VZ' < 'a01' remains valid
+          expect(position).to have_received(:random_fractional)
         end
       end
     end
@@ -805,13 +823,16 @@ describe Narabikae::Position do
         let(:target) { Task.new(position: 'aZ') }
 
         before do
+          allow(position).to receive(:random_fractional).and_return('Z')
           Task.create!(position: 'aa')
         end
 
         it 'always maintains correct order on retry' do
           key = position.find_position_after(target)
           expect(key).to be > target.position
-          expect(key).to eq('ab')
+          expect(key).to eq('aZVZ')
+          expect(key).to be < 'aa'
+          expect(position).to have_received(:random_fractional)
         end
       end
     end

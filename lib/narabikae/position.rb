@@ -32,11 +32,10 @@ module Narabikae
       key = FractionalIndexer.generate_key(prev_key: target_key)
       return key if valid?(key)
 
-      prev_key = key
       (merged_args[:challenge] || 0).times do |i|
-        key = FractionalIndexer.generate_key(prev_key: prev_key)
+        key = FractionalIndexer.generate_key(prev_key: target_key, next_key: key)
+        key += random_fractional
         return key if valid?(key)
-        prev_key = key
       end
 
       nil
@@ -67,6 +66,7 @@ module Narabikae
 
       (merged_args[:challenge] || 0).times do |i|
         key = FractionalIndexer.generate_key(prev_key: key, next_key: target_key)
+        key += random_fractional
         return key if valid?(key)
       end
 
@@ -97,6 +97,7 @@ module Narabikae
 
       (merged_args[:challenge] || 0).times do |i|
         key = FractionalIndexer.generate_key(prev_key: key, next_key: next_key)
+        key += random_fractional
         return key if valid?(key)
       end
 
@@ -113,7 +114,6 @@ module Narabikae
       option.key_max_size >= key.size
     end
 
-
     def current_first_position
       model.merge(model_scope).minimum(option.field)
     end
@@ -124,6 +124,15 @@ module Narabikae
 
     def model
       record.class.base_class
+    end
+
+    # generate a random fractional part
+    #
+    # @return [String] The random fractional part.
+    # @see https://github.com/kazu-2020/fractional_indexer?tab=readme-ov-file#fractional-part
+    def random_fractional
+      # `fractional` represents the fractional part, but to ensure that the last digit is not zero value (ex: base_62 => '0'), the range is set to [1..].
+      FractionalIndexer.configuration.digits[1..].sample
     end
 
     def model_scope
