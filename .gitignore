@@ -10,3 +10,5 @@
 /spec/dummy/narabikae_*
 
 .mise.toml
+
+gemfiles/*.gemfile.lock
