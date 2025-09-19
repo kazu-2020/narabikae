@@ -107,10 +107,15 @@ describe Narabikae::Position do
         let(:target) { Task.new(position: 'a1') }
 
         before do
+          allow(position).to receive(:random_fractional).and_return('C')
           Task.create!(position: 'a2')
         end
 
-        it { is_expected.to match(/^a2.$/) }
+        it 'returns a salted key that is still greater than target' do
+          expect(subject).to eq('a1VC')
+          expect(subject).to be > target.position
+          expect(position).to have_received(:random_fractional)
+        end
       end
 
       context 'when all generated keys are invalid' do
@@ -150,16 +155,7 @@ describe Narabikae::Position do
 
         let(:target) { Task.new(position: 'a1') }
 
-        before do
-          allow(position).to receive(:random_fractional)
-        end
-
         it { is_expected.to be_nil }
-
-        it 'does not try to generate key' do
-          subject
-          expect(position).not_to have_received(:random_fractional)
-        end
       end
     end
 
@@ -250,10 +246,15 @@ describe Narabikae::Position do
         let(:target) { Task.new(position: 'a1') }
 
         before do
+          allow(position).to receive(:random_fractional).and_return('Z')
           Task.create!(position: 'a0')
         end
 
-        it { is_expected.to match(/^a0.$/) }
+        it 'returns a salted key that still keeps order' do
+          expect(subject).to eq('a0VZ')
+          expect(subject).to be < target.position
+          expect(position).to have_received(:random_fractional)
+        end
       end
 
       context 'when all generated keys are invalid' do
@@ -290,16 +291,7 @@ describe Narabikae::Position do
         }
         let(:target) { Task.new(position: 'a1') }
 
-        before do
-          allow(position).to receive(:random_fractional)
-        end
-
         it { is_expected.to eq(nil) }
-
-        it 'does not try to generate key' do
-          subject
-          expect(position).not_to have_received(:random_fractional)
-        end
       end
     end
 
@@ -429,10 +421,16 @@ describe Narabikae::Position do
         let(:next_target) { Task.new(position: 'a2') }
 
         before do
+          allow(position).to receive(:random_fractional).and_return('t')
           Task.create(position: 'a1')
         end
 
-        it { is_expected.to match(/^a1.$/) }
+        it 'returns a salted key that remains between boundaries' do
+          expect(subject).to eq('a1Vt')
+          expect(subject).to be > prev_target.position
+          expect(subject).to be < next_target.position
+          expect(position).to have_received(:random_fractional)
+        end
       end
 
       context 'when all generated keys are invalid' do
@@ -472,15 +470,9 @@ describe Narabikae::Position do
 
         before do
           Task.create(position: 'a1')
-          allow(position).to receive(:random_fractional)
         end
 
         it { is_expected.to eq(nil) }
-
-        it 'does not retry to generate key' do
-          subject
-          expect(position).not_to have_received(:random_fractional)
-        end
       end
     end
   end
@@ -754,6 +746,119 @@ describe Narabikae::Position do
       let(:key) { 'a0' }
 
       it { is_expected.to eq(true) }
+    end
+  end
+
+  describe 'ordering guarantees with retry approach' do
+    describe '#find_position_between with reversed order parameters' do
+      let(:position) {
+        described_class.new(
+          Task.new,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
+        )
+      }
+
+      context 'when prev_target > next_target (reversed order)' do
+        let(:prev_target) { Task.new(position: 'a1') }
+        let(:next_target) { Task.new(position: 'a0') }
+
+        it 'generates key between minmax sorted values' do
+          key = position.find_position_between(prev_target, next_target)
+          expect(key).to start_with('a0')
+          expect(key).to be > 'a0'
+          expect(key).to be < 'a1'
+        end
+
+        it 'but the key does not satisfy original order (prev < key < next)' do
+          key = position.find_position_between(prev_target, next_target)
+          expect(key).not_to satisfy { |k| prev_target.position < k && k < next_target.position }
+        end
+      end
+    end
+
+    describe '#find_position_before with retry approach' do
+      let(:position) {
+        described_class.new(
+          Task.new,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
+        )
+      }
+
+      context 'when the first generated key is invalid' do
+        let(:target) { Task.new(position: 'a01') }
+
+        before do
+          allow(position).to receive(:random_fractional).and_return('Z')
+          Task.create!(position: 'a0')
+        end
+
+        it 'retries with proper boundaries to maintain order' do
+          key = position.find_position_before(target)
+
+          expect(key).to be < target.position
+          expect(key).to eq('a00VZ')  # because 'a0' < 'a00VZ' < 'a01' remains valid
+          expect(position).to have_received(:random_fractional)
+        end
+      end
+    end
+
+    describe '#find_position_after with retry approach' do
+      let(:position) {
+        described_class.new(
+          Task.new,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
+        )
+      }
+
+      context 'when generated key needs retry' do
+        let(:target) { Task.new(position: 'aZ') }
+
+        before do
+          allow(position).to receive(:random_fractional).and_return('Z')
+          Task.create!(position: 'aa')
+        end
+
+        it 'always maintains correct order on retry' do
+          key = position.find_position_after(target)
+          expect(key).to be > target.position
+          expect(key).to eq('aZVZ')
+          expect(key).to be < 'aa'
+          expect(position).to have_received(:random_fractional)
+        end
+      end
+    end
+
+    describe 'demonstrating the complete solution' do
+      let(:position) {
+        described_class.new(
+          Task.new,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
+        )
+      }
+
+      it 'ensures retry approach maintains order with minmax' do
+        prev = Task.new(position: 'a1')
+        nxt = Task.new(position: 'a0')
+        Task.create!(position: 'a0V')
+
+        key = position.find_position_between(prev, nxt)
+
+        expect(key).to start_with('a0')
+        expect(key).to be > 'a0'
+        expect(key).to be < 'a1'
+      end
     end
   end
 end

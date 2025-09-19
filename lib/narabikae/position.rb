@@ -28,12 +28,12 @@ module Narabikae
     def find_position_after(target, **args)
       merged_args = { challenge: 10 }.merge(args)
       # when target is nil, try to generate key from the last position
-      key = FractionalIndexer.generate_key(
-              prev_key: target&.send(option.field) || current_last_position
-            )
+      target_key = target&.send(option.field) || current_last_position
+      key = FractionalIndexer.generate_key(prev_key: target_key)
       return key if valid?(key)
 
-      (merged_args[:challenge] || 0).times do
+      (merged_args[:challenge] || 0).times do |i|
+        key = FractionalIndexer.generate_key(prev_key: target_key, next_key: key)
         key += random_fractional
         return key if valid?(key)
       end
@@ -60,12 +60,12 @@ module Narabikae
     def find_position_before(target, **args)
       merged_args = { challenge: 10 }.merge(args)
       # when target is nil, try to generate key from the first position
-      key = FractionalIndexer.generate_key(
-              next_key: target&.send(option.field) || current_first_position
-            )
+      target_key = target&.send(option.field) || current_first_position
+      key = FractionalIndexer.generate_key(next_key: target_key)
       return key if valid?(key)
 
-      (merged_args[:challenge] || 0).times do
+      (merged_args[:challenge] || 0).times do |i|
+        key = FractionalIndexer.generate_key(prev_key: key, next_key: target_key)
         key += random_fractional
         return key if valid?(key)
       end
@@ -95,7 +95,8 @@ module Narabikae
             )
       return key if valid?(key)
 
-      (merged_args[:challenge] || 0).times do
+      (merged_args[:challenge] || 0).times do |i|
+        key = FractionalIndexer.generate_key(prev_key: key, next_key: next_key)
         key += random_fractional
         return key if valid?(key)
       end
