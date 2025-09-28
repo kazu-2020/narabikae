@@ -2,9 +2,9 @@ PATH
   remote: .
   specs:
     narabikae (0.2.0)
-      activerecord
-      activesupport
-      fractional_indexer
+      activerecord (>= 6.1, < 8.0)
+      activesupport (>= 6.1, < 8.0)
+      fractional_indexer (>= 0.4.0)
 
 GEM
   remote: https://rubygems.org/

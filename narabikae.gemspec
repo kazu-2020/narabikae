@@ -12,6 +12,8 @@ Gem::Specification.new do |spec|
   DESCRIPTION
   spec.license = 'MIT'
 
+  spec.required_ruby_version = '>= 3.0'
+
   spec.metadata['homepage_uri']    = spec.homepage
   spec.metadata['changelog_uri']   = 'https://github.com/kazu-2020/narabikae/releases'
   spec.metadata['bug_tracker_uri'] = 'https://github.com/kazu-2020/narabikae/issues'
@@ -26,9 +28,9 @@ Gem::Specification.new do |spec|
 
   spec.require_paths = [ 'lib' ]
 
-  spec.add_dependency 'fractional_indexer'
-  spec.add_dependency 'activerecord'
-  spec.add_dependency 'activesupport'
+  spec.add_dependency 'fractional_indexer', '>= 0.4.0'
+  spec.add_dependency 'activerecord', '>= 6.1', '< 8.0'
+  spec.add_dependency 'activesupport', '>= 6.1', '< 8.0'
 
   spec.add_development_dependency 'rspec-rails'
   spec.add_development_dependency 'rubocop-rails-omakase', "~> 1.0.0"
