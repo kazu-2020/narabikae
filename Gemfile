@@ -10,7 +10,4 @@ gem "mysql2"
 # gem "pg"
 # gem "sqlite3"
 
-gem "mutex_m" # to ruby version 3.4
-
-
 gem "debug", ">= 1.0.0"
