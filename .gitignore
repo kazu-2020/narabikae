@@ -3,10 +3,14 @@
 /log/*.log
 /pkg/
 /tmp/
+
 /spec/dummy/log/*.log
 /spec/dummy/storage/
 /spec/dummy/tmp/
-
 /spec/dummy/narabikae_*
+
+Gemfile.lock
+/gemfiles/*.gemfile.lock
+
 
 .mise.toml
