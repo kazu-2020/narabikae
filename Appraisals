@@ -1,5 +1,6 @@
 appraise "rails-6-1" do
   gem "rails", "~> 6.1.0"
+  gem "concurrent-ruby", "1.3.4"
 end
 
 appraise "rails-7" do
