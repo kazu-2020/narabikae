@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activesupport'
 
   spec.add_development_dependency 'rspec-rails'
-  spec.add_development_dependency 'rubocop-rails-omakase'
-  spec.add_development_dependency 'rubocop-rspec'
-  spec.add_development_dependency "appraisal"
+  spec.add_development_dependency 'rubocop-rails-omakase', "~> 1.0.0"
+  spec.add_development_dependency 'rubocop-rspec', "~> 3.1.0"
+  spec.add_development_dependency "appraisal", "2.5.0"
 end
