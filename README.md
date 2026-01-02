@@ -92,6 +92,16 @@ Task.order(:position).pluck(:name, :position)
 > [!NOTE]
 > The position is set using the before_create callback. Therefore, do not define validations such as presence on the attributes managed by this gem!
 
+#### Default position
+
+By default, new/auto-set records are inserted at the end of the list. To insert at the beginning instead:
+
+```rb
+class Task < ApplicationRecord
+  narabikae :position, size: 200, default_position: :first
+end
+```
+
 ## Usage Details
 
 ### Reorder
@@ -177,6 +187,27 @@ You can also use setter-style aliases:
 ```ruby
 target.position_after = tasks.last
 target.position_between = [tasks.first, tasks.last]
+```
+
+#### Form-friendly setters
+
+The setter aliases can be used directly in forms or `assign_attributes`. They accept a target record or a position string. For `*_between=`, you can pass an array or hash.
+
+```ruby
+# position string input (e.g., from a hidden field)
+task.assign_attributes(position_after: "a3")
+
+# between using an array
+task.position_between = [tasks.first, tasks.last]
+
+# between using a hash (string or symbol keys)
+task.position_between = { prev: "a1", next: "a3" }
+```
+
+If you need retries, use the method form and pass `challenge` there:
+
+```ruby
+task.set_position_between(tasks.first, tasks.last, challenge: 15)
 ```
 
 ### Scope
