@@ -9,9 +9,23 @@ describe 'call narabikae' do
     end
 
     it 'The method you expect to be used is dynamically defined.' do
+      expect(Sample.new).to respond_to(:set_order_after)
+      expect(Sample.new).to respond_to(:set_order_before)
+      expect(Sample.new).to respond_to(:set_order_between)
+      expect(Sample.new).to respond_to(:order_after=)
+      expect(Sample.new).to respond_to(:order_before=)
+      expect(Sample.new).to respond_to(:order_between=)
+
       expect(Sample.new).to respond_to(:move_to_order_after)
       expect(Sample.new).to respond_to(:move_to_order_before)
       expect(Sample.new).to respond_to(:move_to_order_between)
+
+      expect(Sample.new).to respond_to(:set_position_after)
+      expect(Sample.new).to respond_to(:set_position_before)
+      expect(Sample.new).to respond_to(:set_position_between)
+      expect(Sample.new).to respond_to(:position_after=)
+      expect(Sample.new).to respond_to(:position_before=)
+      expect(Sample.new).to respond_to(:position_between=)
 
       expect(Sample.new).to respond_to(:move_to_position_after)
       expect(Sample.new).to respond_to(:move_to_position_before)

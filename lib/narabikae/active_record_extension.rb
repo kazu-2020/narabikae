@@ -16,31 +16,57 @@ module Narabikae
       true
     end
 
-    def set_position
-      record.send("#{option.field}=", position_generator.create_last_position)
+    def set_position(position = option.default_position)
+      new_position =
+        case position
+        when :first
+          position_generator.create_first_position
+        when :last
+          position_generator.create_last_position
+        end
+
+      record.send("#{option.field}=", new_position)
     end
 
-    def move_to_after(target, **args)
+    def set_after(target, **args)
       new_position = position_generator.find_position_after(target, **args)
       return false if new_position.blank?
 
       record.send("#{option.field}=", new_position)
-      record.save
+      true
     end
 
-    def move_to_before(target, **args)
+    def set_before(target, **args)
       new_position = position_generator.find_position_before(target, **args)
       return false if new_position.blank?
 
       record.send("#{option.field}=", new_position)
-      record.save
+      true
     end
 
-    def move_to_between(prev_target, next_target, **args)
+    def set_between(prev_target, next_target, **args)
       new_position = position_generator.find_position_between(prev_target, next_target, **args)
       return false if new_position.blank?
 
       record.send("#{option.field}=", new_position)
+      true
+    end
+
+    def move_to_after(target, **args)
+      return false unless set_after(target, **args)
+
+      record.save
+    end
+
+    def move_to_before(target, **args)
+      return false unless set_before(target, **args)
+
+      record.save
+    end
+
+    def move_to_between(prev_target, next_target, **args)
+      return false unless set_between(prev_target, next_target, **args)
+
       record.save
     end
 

@@ -25,6 +25,15 @@ describe 'move_to_<field>_xxx' do
       it { is_expected.to eq true }
       it { expect { subject }.to change { current.reload.position }.from('a0').to('a2') }
     end
+
+    context 'when target is a position string' do
+      let(:current) { Sample.create } # position: 'a0'
+      let(:target_record) { Sample.create } # position: 'a1'
+      let(:target) { target_record.position }
+
+      it { is_expected.to eq true }
+      it { expect { subject }.to change { current.reload.position }.from('a0').to('a2') }
+    end
   end
 
   describe 'move_to_<field>_before' do
@@ -41,6 +50,19 @@ describe 'move_to_<field>_xxx' do
 
     context 'when target is not nil' do
       let(:target) { Sample.create } # position: 'a1'
+
+      it { is_expected.to eq true }
+      it {
+        expect { subject }
+          .to change { current.reload.position }
+          .from('a0')
+          .to(satisfy { |value| value.start_with?('a0V') && value.length == 4 })
+      }
+    end
+
+    context 'when target is a position string' do
+      let(:target_record) { Sample.create } # position: 'a1'
+      let(:target) { target_record.position }
 
       it { is_expected.to eq true }
       it {
@@ -85,5 +107,120 @@ describe 'move_to_<field>_xxx' do
       it { is_expected.to eq true }
       it { expect { subject }.to change { current.reload.position }.from('a0').to('a1V') }
     end
+
+    context 'when prev_target and next_target are position strings' do
+      let(:prev_record) { Sample.create } # position: 'a1'
+      let(:next_record) { Sample.create } # position: 'a2'
+      let(:prev_target) { prev_record.position }
+      let(:next_target) { next_record.position }
+
+      it { is_expected.to eq true }
+      it { expect { subject }.to change { current.reload.position }.from('a0').to('a1V') }
+    end
+  end
+
+  describe 'set_<field>_after' do
+    subject { current.set_position_after(target) }
+
+    let(:current) { Sample.create } # position: 'a0'
+
+    context 'when target is nil' do
+      let(:target) { nil }
+
+      it { is_expected.to eq true }
+      it { expect { subject }.to change { current.position }.from('a0').to('a1') }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+
+    context 'when target is a position string' do
+      let(:target_record) { Sample.create } # position: 'a1'
+      let(:target) { target_record.position }
+
+      it { is_expected.to eq true }
+      it { expect { subject }.to change { current.position }.from('a0').to('a2') }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+  end
+
+  describe 'set_<field>_before' do
+    subject { current.set_position_before(target) }
+
+    let(:current) { Sample.create } # position: 'a0'
+
+    context 'when target is nil' do
+      let(:target) { nil }
+
+      it { is_expected.to eq true }
+      it { expect { subject }.to change { current.position }.from('a0').to('Zz') }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+
+    context 'when target is a position string' do
+      let(:target_record) { Sample.create } # position: 'a1'
+      let(:target) { target_record.position }
+
+      it { is_expected.to eq true }
+      it {
+        expect { subject }
+          .to change { current.position }
+          .from('a0')
+          .to(satisfy { |value| value.start_with?('a0V') && value.length == 4 })
+      }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+  end
+
+  describe 'set_<field>_between' do
+    subject { current.set_position_between(prev_target, next_target) }
+
+    let(:current) { Sample.create } # position: 'a0'
+
+    context 'when prev_target is nil' do
+      let(:prev_target) { nil }
+      let(:next_target) { Sample.create } # position: 'a1'
+
+      it { is_expected.to eq true }
+      it {
+        expect { subject }
+          .to change { current.position }
+          .from('a0')
+          .to(satisfy { |value| value.start_with?('a0V') && value.length == 4 })
+      }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+
+    context 'when prev_target and next_target are position strings' do
+      let(:prev_record) { Sample.create } # position: 'a1'
+      let(:next_record) { Sample.create } # position: 'a2'
+      let(:prev_target) { prev_record.position }
+      let(:next_target) { next_record.position }
+
+      it { is_expected.to eq true }
+      it { expect { subject }.to change { current.position }.from('a0').to('a1V') }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+  end
+
+  describe '<field>_after=' do
+    subject { current.position_after = target }
+
+    let(:current) { Sample.create } # position: 'a0'
+    let(:target) { Sample.create } # position: 'a1'
+
+    it { is_expected.to eq target }
+    it { expect { subject }.to change { current.position }.from('a0').to('a2') }
+    it { expect { subject }.not_to change { current.reload.position } }
+  end
+
+  describe '<field>_between=' do
+    subject { current.position_between = [prev_target, next_target] }
+
+    let(:current) { Sample.create } # position: 'a0'
+    let(:prev_target) { Sample.create } # position: 'a1'
+    let(:next_target) { Sample.create } # position: 'a2'
+
+    it { is_expected.to eq [prev_target, next_target] }
+    it { expect { subject }.to change { current.position }.from('a0').to('a1V') }
+    it { expect { subject }.not_to change { current.reload.position } }
   end
 end

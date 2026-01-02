@@ -69,6 +69,10 @@ class Task < ApplicationRecord
   #       Used for validation of the internally generated order value.
   #       This value should be equivalent to
   #       the limit set in the DB column.
+  #
+  # default_position: optional
+  #       Set where new/auto-set records are inserted.
+  #       Accepts :first or :last (default).
 end
 ```
 
@@ -155,6 +159,24 @@ target.position
 
 # If the second argument is nil, it behaves the same as `move_to_<field>_after`
 # ex: target.move_to_position_between(tasks.first, nil)
+```
+
+### Set without saving
+
+If you want to set the new position value and save later (for example, in a form), use `set_<field>_after/before/between`. These methods only assign the new position value and do not persist the record.
+
+```ruby
+target.set_position_after(tasks.last)
+target.position
+# => 'a3'
+target.save
+```
+
+You can also use setter-style aliases:
+
+```ruby
+target.position_after = tasks.last
+target.position_between = [tasks.first, tasks.last]
 ```
 
 ### Scope

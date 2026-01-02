@@ -80,8 +80,6 @@ describe Narabikae::ActiveRecordExtension do
   end
 
   describe "#set_position" do
-    subject { instance.set_position }
-
     let(:record) { Task.new }
     let(:instance) {
       described_class.new(
@@ -93,7 +91,141 @@ describe Narabikae::ActiveRecordExtension do
       )
     }
 
-    it { expect { subject }.to change { record.position }.from(nil).to('a0') }
+    context "when default_position is :last" do
+      subject { instance.set_position }
+
+      it { expect { subject }.to change { record.position }.from(nil).to('a0') }
+    end
+
+    context "when default_position is :first" do
+      subject { instance.set_position(:first) }
+
+      let!(:existing) { Task.create(position: 'a0') }
+
+      it { expect { subject }.to change { record.position }.from(nil).to('Zz') }
+    end
+  end
+
+  describe "#set_after" do
+    subject { instance.set_after(target, challenge: 0) }
+
+    context 'when the new position generation fails ' do
+      let(:instance) {
+        described_class.new(
+          current,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
+        )
+      }
+      let(:current) { Task.create(position: 'a0') }
+      let(:target) { Task.new(position: 'invalid') }
+
+      it { expect(subject).to eq false }
+      it { expect { subject }.not_to change { current.position } }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+
+    context 'when the new position generation succeeds' do
+      let(:instance) {
+        described_class.new(
+          current,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
+        )
+      }
+      let(:current) { Task.create(position: 'a0') }
+      let(:target) { Task.create(position: 'b10abc') }
+
+      it { expect(subject).to eq true }
+      it { expect { subject }.to change { current.position }.from('a0').to('b11') }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+  end
+
+  describe "#set_before" do
+    subject { instance.set_before(target, challenge: nil) }
+
+    context 'when the new position generation fails ' do
+      let(:instance) {
+        described_class.new(
+          current,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
+        )
+      }
+      let(:current) { Task.create(position: 'a0') }
+      let(:target) { Task.new(position: 'invalid') }
+
+      it { expect(subject).to eq false }
+      it { expect { subject }.not_to change { current.position } }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+
+    context 'when the new position generation succeeds' do
+      let(:instance) {
+        described_class.new(
+          current,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
+        )
+      }
+      let(:current) { Task.create(position: 'a0') }
+      let(:target) { Task.create(position: 'b10abc') }
+
+      it { expect(subject).to eq true }
+      it { expect { subject }.to change { current.position }.from('a0').to('b10') }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+  end
+
+  describe "#set_between" do
+    subject { instance.set_between(prev_target, next_target, challenge: 5) }
+
+    context 'when the new position generation fails ' do
+      let(:instance) {
+        described_class.new(
+          current,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
+        )
+      }
+      let(:current) { Task.create(position: 'a0') }
+      let(:prev_target) { Task.new(position: 'invalid') }
+      let(:next_target) { Task.new(position: 'invalid') }
+
+      it { expect(subject).to eq false }
+      it { expect { subject }.not_to change { current.position } }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
+
+    context 'when the new position generation succeeds' do
+      let(:instance) {
+        described_class.new(
+          current,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 10
+          )
+        )
+      }
+      let(:current) { Task.create(position: 'a0') }
+      let(:prev_target) { Task.create(position: 'b10abc') }
+      let(:next_target) { Task.create(position: 'b20abc') }
+
+      it { expect(subject).to eq true }
+      it { expect { subject }.to change { current.position }.from('a0').to('b11') }
+      it { expect { subject }.not_to change { current.reload.position } }
+    end
   end
 
   describe "#move_to_after" do

@@ -49,6 +49,54 @@ describe Narabikae::Position do
     end
   end
 
+  describe '#create_first_position' do
+    subject { position.create_first_position }
+
+    let(:position) {
+      described_class.new(
+        Task.new,
+        Narabikae::Option.new(
+          field: :position,
+          key_max_size: 30
+        )
+      )
+    }
+
+    context 'DB table is empty' do
+      it { is_expected.to eq('a0') }
+    end
+
+    context 'DB table has records' do
+      before do
+        Task.create({ position: 'a0' })
+        Task.create({ position: 'b0' })
+        Task.create({ position: 'c0' })
+      end
+
+      it { is_expected.to eq('Zz') }
+    end
+
+    context 'when option has scope' do
+      let(:position) {
+        described_class.new(
+          Task.new(user_id: 1),
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30,
+            scope: %i[user_id]
+          )
+        )
+      }
+
+      before do
+        Task.create!(user_id: 1, position: 'a0')
+        Task.create!(user_id: 2, position: 'a7')
+      end
+
+      it { is_expected.to eq('Zz') }
+    end
+  end
+
   describe '#find_position_after' do
     subject { position.find_position_after(target) }
 
@@ -343,7 +391,7 @@ describe Narabikae::Position do
       it 'calls #find_position_before' do
         subject
 
-        expect(position).to have_received(:find_position_before).with(next_target)
+        expect(position).to have_received(:find_position_before).with(next_target, challenge: 10)
       end
     end
 
@@ -369,7 +417,7 @@ describe Narabikae::Position do
       it 'calls #find_position_after' do
         subject
 
-        expect(position).to have_received(:find_position_after).with(prev_target)
+        expect(position).to have_received(:find_position_after).with(prev_target, challenge: 10)
       end
     end
 
