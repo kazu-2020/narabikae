@@ -161,8 +161,35 @@ module Narabikae
       return if target.nil?
       return target if target.is_a?(String)
       return FractionalIndexer.generate_keys(count: target + 1).last if target.is_a?(Integer)
+      record_table = table_name_for_class(record)
+      target_table = table_name_for_class(target)
+      unless target_table && record_table && target_table == record_table
+        raise Narabikae::Error,
+              "target model mismatch: expected table #{record_table || 'unknown'}, got #{target_table || 'unknown'}"
+      end
+
+      mismatched_columns = mismatched_scope_columns(target)
+      if mismatched_columns.any?
+        raise Narabikae::Error, "target scope mismatch for columns: #{mismatched_columns.join(', ')}"
+      end
+      raise Narabikae::Error, "target missing #{option.field} field" unless target.respond_to?(option.field)
 
       target.send(option.field)
+    end
+
+    def table_name_for_class(value)
+      klass = value.class
+      return unless klass.respond_to?(:table_name)
+
+      klass.table_name
+    end
+
+    def mismatched_scope_columns(target)
+      option.scope.select do |column|
+        !target.respond_to?(column) ||
+          !record.respond_to?(column) ||
+          target.public_send(column) != record.public_send(column)
+      end
     end
   end
 end
