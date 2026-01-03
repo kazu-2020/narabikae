@@ -106,6 +106,14 @@ module Narabikae
       nil
     end
 
+    # Returns the position for the given target.
+    #
+    # @param target [String, Integer, #send(field)]
+    # @return [String, nil]
+    def find_position_at(target)
+      extract_target_key(target)
+    end
+
     private
 
     attr_reader :record, :option
@@ -152,6 +160,7 @@ module Narabikae
     def extract_target_key(target)
       return if target.nil?
       return target if target.is_a?(String)
+      return FractionalIndexer.generate_keys(count: target + 1).last if target.is_a?(Integer)
 
       target.send(option.field)
     end

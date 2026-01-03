@@ -210,6 +210,38 @@ If you need retries, use the method form and pass `challenge` there:
 task.set_position_between(tasks.first, tasks.last, challenge: 15)
 ```
 
+#### Absolute ordering with *_index
+
+If you already know the final order (for example, a drag-and-drop list form), you can submit 0-based indexes (0 is the first item) and let Narabikae map them to fractional keys:
+
+```ruby
+task.position_index = 0
+task.set_position_index("1")
+task.move_to_position_index(2)
+```
+
+Example with nested attributes (each item has a `position_index` field in the form payload):
+
+```ruby
+# controller
+def project_params
+  params.require(:project).permit(tasks_attributes: %i[id name position_index])
+end
+
+# params payload
+# {
+#   project: {
+#     tasks_attributes: [
+#       { id: 1, name: "task-1", position_index: 0 },
+#       { id: 2, name: "task-2", position_index: 1 }
+#     ]
+#   }
+# }
+```
+
+> [!NOTE]
+> If you have a unique index on the position column, make it deferrable (Rails: `deferrable: :deferred`) so the batch update can succeed inside a transaction. When using `*_index`, include every item in the scope in the form, ensure indexes are 0..(n-1), and validate that each `position_index` is unique.
+
 ### Scope
 
 You can use this when you want to manage independent positions within specific scopes, such as foreign keys.
