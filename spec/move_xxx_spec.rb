@@ -157,7 +157,7 @@ describe 'move_to_<field>_xxx' do
     context 'when target is nil' do
       let(:target) { nil }
 
-      it { is_expected.to eq true }
+      it { is_expected.to eq('a1') }
       it { expect { subject }.to change { current.position }.from('a0').to('a1') }
       it { expect { subject }.not_to change { current.reload.position } }
     end
@@ -166,7 +166,7 @@ describe 'move_to_<field>_xxx' do
       let(:target_record) { Sample.create } # position: 'a1'
       let(:target) { target_record.position }
 
-      it { is_expected.to eq true }
+      it { is_expected.to eq('a2') }
       it { expect { subject }.to change { current.position }.from('a0').to('a2') }
       it { expect { subject }.not_to change { current.reload.position } }
     end
@@ -180,7 +180,7 @@ describe 'move_to_<field>_xxx' do
     context 'when target is nil' do
       let(:target) { nil }
 
-      it { is_expected.to eq true }
+      it { is_expected.to eq('Zz') }
       it { expect { subject }.to change { current.position }.from('a0').to('Zz') }
       it { expect { subject }.not_to change { current.reload.position } }
     end
@@ -189,7 +189,7 @@ describe 'move_to_<field>_xxx' do
       let(:target_record) { Sample.create } # position: 'a1'
       let(:target) { target_record.position }
 
-      it { is_expected.to eq true }
+      it { is_expected.to satisfy { |value| value.start_with?('a0V') && value.length == 4 } }
       it {
         expect { subject }
           .to change { current.position }
@@ -209,7 +209,7 @@ describe 'move_to_<field>_xxx' do
       let(:prev_target) { nil }
       let(:next_target) { Sample.create } # position: 'a1'
 
-      it { is_expected.to eq true }
+      it { is_expected.to satisfy { |value| value.start_with?('a0V') && value.length == 4 } }
       it {
         expect { subject }
           .to change { current.position }
@@ -225,7 +225,7 @@ describe 'move_to_<field>_xxx' do
       let(:prev_target) { prev_record.position }
       let(:next_target) { next_record.position }
 
-      it { is_expected.to eq true }
+      it { is_expected.to eq('a1V') }
       it { expect { subject }.to change { current.position }.from('a0').to('a1V') }
       it { expect { subject }.not_to change { current.reload.position } }
     end
@@ -238,7 +238,7 @@ describe 'move_to_<field>_xxx' do
     let(:index_value) { '3' }
     let(:expected_position) { FractionalIndexer.generate_keys(count: index_value.to_i + 1).last }
 
-    it { is_expected.to eq true }
+    it { is_expected.to eq expected_position }
     it { expect { subject }.to change { current.position }.from('a0').to(expected_position) }
     it { expect { subject }.not_to change { current.reload.position } }
   end

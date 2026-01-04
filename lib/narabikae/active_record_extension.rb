@@ -33,7 +33,6 @@ module Narabikae
       return false if new_position.blank?
 
       record.send("#{option.field}=", new_position)
-      true
     end
 
     def set_before(target, **args)
@@ -41,7 +40,6 @@ module Narabikae
       return false if new_position.blank?
 
       record.send("#{option.field}=", new_position)
-      true
     end
 
     def set_between(prev_target, next_target, **args)
@@ -49,7 +47,6 @@ module Narabikae
       return false if new_position.blank?
 
       record.send("#{option.field}=", new_position)
-      true
     end
 
     def index
@@ -61,7 +58,6 @@ module Narabikae
       return false if key.blank?
 
       record.send("#{option.field}=", key)
-      true
     end
 
     def move_to_after(target, **args)

@@ -140,7 +140,7 @@ describe Narabikae::ActiveRecordExtension do
       let(:current) { Task.create(position: 'a0') }
       let(:target) { Task.create(position: 'b10abc') }
 
-      it { expect(subject).to eq true }
+      it { expect(subject).to eq 'b11' }
       it { expect { subject }.to change { current.position }.from('a0').to('b11') }
       it { expect { subject }.not_to change { current.reload.position } }
     end
@@ -180,7 +180,7 @@ describe Narabikae::ActiveRecordExtension do
       let(:current) { Task.create(position: 'a0') }
       let(:target) { Task.create(position: 'b10abc') }
 
-      it { expect(subject).to eq true }
+      it { expect(subject).to eq 'b10' }
       it { expect { subject }.to change { current.position }.from('a0').to('b10') }
       it { expect { subject }.not_to change { current.reload.position } }
     end
@@ -222,7 +222,7 @@ describe Narabikae::ActiveRecordExtension do
       let(:prev_target) { Task.create(position: 'b10abc') }
       let(:next_target) { Task.create(position: 'b20abc') }
 
-      it { expect(subject).to eq true }
+      it { expect(subject).to eq 'b11' }
       it { expect { subject }.to change { current.position }.from('a0').to('b11') }
       it { expect { subject }.not_to change { current.reload.position } }
     end
