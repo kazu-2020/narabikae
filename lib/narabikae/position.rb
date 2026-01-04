@@ -85,9 +85,6 @@ module Narabikae
     # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [string, nil] The position between the two targets, or nil if no valid position is found.
     def find_position_between(prev_target, next_target, challenge: 10)
-      return find_position_before(next_target, challenge: challenge) if prev_target.blank?
-      return find_position_after(prev_target, challenge: challenge)  if next_target.blank?
-
       prev_key = extract_target_key(prev_target)
       next_key = extract_target_key(next_target)
       return find_position_before(next_target, challenge: challenge) if prev_key.blank?

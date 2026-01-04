@@ -243,13 +243,13 @@ describe 'move_to_<field>_xxx' do
   end
 
   describe '<field>_between=' do
-    subject { current.position_between = [prev_target, next_target] }
+    subject { current.position_between = [ prev_target, next_target ] }
 
     let(:current) { Sample.create } # position: 'a0'
     let(:prev_target) { Sample.create } # position: 'a1'
     let(:next_target) { Sample.create } # position: 'a2'
 
-    it { is_expected.to eq [prev_target, next_target] }
+    it { is_expected.to eq [ prev_target, next_target ] }
     it { expect { subject }.to change { current.position }.from('a0').to('a1V') }
     it { expect { subject }.not_to change { current.reload.position } }
   end

@@ -108,7 +108,7 @@ module Narabikae
 
         define_singleton_method :"reorder_#{field}" do |*order_args, **order_kwargs|
           order_args << order_kwargs if order_kwargs.any?
-          order_args = [field] if order_args.empty?
+          order_args = [ field ] if order_args.empty?
 
           scope_columns = option.scope
           relation = all
