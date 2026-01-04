@@ -28,7 +28,7 @@ module Narabikae
     # a new key is generated until the challenge count reaches the limit.
     # challenge count is 10 by default.
     #
-    # @param target [#send(field)]
+    # @param target [Integer, String, #send(field)]
     # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [String, nil] The generated key for the position after the target, or nil if no valid position is found.
     def find_position_after(target, challenge: 10)
@@ -58,7 +58,7 @@ module Narabikae
     #   position = Position.new
     #   position.find_position_before(target, challenge: 5)
     #
-    # @param target [#send(field)]
+    # @param target [Integer, String, #send(field)]
     # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [String, nil] The generated key for the position before the target, or nil if no valid position is found.
     def find_position_before(target, challenge: 10)
@@ -80,8 +80,8 @@ module Narabikae
 
     # Finds the position between two targets.
     #
-    # @param prev_target [#send(field)] The previous target.
-    # @param next_target [#send(field)] The next target.
+    # @param prev_target [Integer, String, #send(field)] The previous target.
+    # @param next_target [Integer, String, #send(field)] The next target.
     # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [string, nil] The position between the two targets, or nil if no valid position is found.
     def find_position_between(prev_target, next_target, challenge: 10)
@@ -108,12 +108,14 @@ module Narabikae
       nil
     end
 
-    # Returns the position for the given target.
+    # Returns the position key for a 0-based index.
     #
-    # @param target [String, Integer, #send(field)]
+    # @param index [Integer]
     # @return [String, nil]
-    def find_position_at(target)
-      extract_target_key(target)
+    def find_position_at(index)
+      return if index.nil?
+
+      FractionalIndexer.generate_keys(count: index + 1).last
     end
 
     # Returns the positional index for the current record within its scope.
@@ -143,7 +145,7 @@ module Narabikae
     end
 
     def model
-      record.class.base_class
+      record.class.base_class.unscoped
     end
 
     # generate a random fractional part
@@ -171,8 +173,8 @@ module Narabikae
 
     def extract_target_key(target)
       return if target.nil?
-      return target if target.is_a?(String)
-      return FractionalIndexer.generate_keys(count: target + 1).last if target.is_a?(Integer)
+      target = model.find(target) unless target.is_a?(ActiveRecord::Base)
+
       record_table = table_name_for_class(record)
       target_table = table_name_for_class(target)
       unless target_table && record_table && target_table == record_table

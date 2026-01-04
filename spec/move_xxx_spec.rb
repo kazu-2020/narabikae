@@ -26,14 +26,6 @@ describe 'move_to_<field>_xxx' do
       it { expect { subject }.to change { current.reload.position }.from('a0').to('a2') }
     end
 
-    context 'when target is a position string' do
-      let(:current) { Sample.create } # position: 'a0'
-      let(:target_record) { Sample.create } # position: 'a1'
-      let(:target) { target_record.position }
-
-      it { is_expected.to eq true }
-      it { expect { subject }.to change { current.reload.position }.from('a0').to('a2') }
-    end
   end
 
   describe 'move_to_<field>_before' do
@@ -60,18 +52,6 @@ describe 'move_to_<field>_xxx' do
       }
     end
 
-    context 'when target is a position string' do
-      let(:target_record) { Sample.create } # position: 'a1'
-      let(:target) { target_record.position }
-
-      it { is_expected.to eq true }
-      it {
-        expect { subject }
-          .to change { current.reload.position }
-          .from('a0')
-          .to(satisfy { |value| value.start_with?('a0V') && value.length == 4 })
-      }
-    end
   end
 
   describe 'move_to_<field>_between' do
@@ -108,15 +88,6 @@ describe 'move_to_<field>_xxx' do
       it { expect { subject }.to change { current.reload.position }.from('a0').to('a1V') }
     end
 
-    context 'when prev_target and next_target are position strings' do
-      let(:prev_record) { Sample.create } # position: 'a1'
-      let(:next_record) { Sample.create } # position: 'a2'
-      let(:prev_target) { prev_record.position }
-      let(:next_target) { next_record.position }
-
-      it { is_expected.to eq true }
-      it { expect { subject }.to change { current.reload.position }.from('a0').to('a1V') }
-    end
   end
 
   describe 'move_to_<field>_index' do
@@ -162,14 +133,6 @@ describe 'move_to_<field>_xxx' do
       it { expect { subject }.not_to change { current.reload.position } }
     end
 
-    context 'when target is a position string' do
-      let(:target_record) { Sample.create } # position: 'a1'
-      let(:target) { target_record.position }
-
-      it { is_expected.to eq('a2') }
-      it { expect { subject }.to change { current.position }.from('a0').to('a2') }
-      it { expect { subject }.not_to change { current.reload.position } }
-    end
   end
 
   describe 'set_<field>_before' do
@@ -185,19 +148,6 @@ describe 'move_to_<field>_xxx' do
       it { expect { subject }.not_to change { current.reload.position } }
     end
 
-    context 'when target is a position string' do
-      let(:target_record) { Sample.create } # position: 'a1'
-      let(:target) { target_record.position }
-
-      it { is_expected.to satisfy { |value| value.start_with?('a0V') && value.length == 4 } }
-      it {
-        expect { subject }
-          .to change { current.position }
-          .from('a0')
-          .to(satisfy { |value| value.start_with?('a0V') && value.length == 4 })
-      }
-      it { expect { subject }.not_to change { current.reload.position } }
-    end
   end
 
   describe 'set_<field>_between' do
@@ -219,16 +169,6 @@ describe 'move_to_<field>_xxx' do
       it { expect { subject }.not_to change { current.reload.position } }
     end
 
-    context 'when prev_target and next_target are position strings' do
-      let(:prev_record) { Sample.create } # position: 'a1'
-      let(:next_record) { Sample.create } # position: 'a2'
-      let(:prev_target) { prev_record.position }
-      let(:next_target) { next_record.position }
-
-      it { is_expected.to eq('a1V') }
-      it { expect { subject }.to change { current.position }.from('a0').to('a1V') }
-      it { expect { subject }.not_to change { current.reload.position } }
-    end
   end
 
   describe 'set_<field>_index' do
