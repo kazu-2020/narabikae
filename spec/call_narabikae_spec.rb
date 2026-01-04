@@ -22,6 +22,7 @@ describe 'call narabikae' do
       expect(Sample.new).to respond_to(:move_to_order_before)
       expect(Sample.new).to respond_to(:move_to_order_between)
       expect(Sample.new).to respond_to(:move_to_order_index)
+      expect(Sample).to respond_to(:reorder_order)
 
       expect(Sample.new).to respond_to(:set_position_after)
       expect(Sample.new).to respond_to(:set_position_before)
@@ -36,6 +37,7 @@ describe 'call narabikae' do
       expect(Sample.new).to respond_to(:move_to_position_before)
       expect(Sample.new).to respond_to(:move_to_position_between)
       expect(Sample.new).to respond_to(:move_to_position_index)
+      expect(Sample).to respond_to(:reorder_position)
     end
 
     after do

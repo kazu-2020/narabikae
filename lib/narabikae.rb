@@ -105,6 +105,41 @@ module Narabikae
           extension = Narabikae::ActiveRecordExtension.new(self, option)
           extension.move_to_index(value.to_i)
         end
+
+        define_singleton_method :"reorder_#{field}" do |*order_args, **order_kwargs|
+          order_args << order_kwargs if order_kwargs.any?
+          order_args = [field] if order_args.empty?
+
+          scope_columns = option.scope
+          relation = all
+          scope_values =
+            if scope_columns.empty?
+              [ [] ]
+            else
+              relation.distinct.pluck(*scope_columns).map do |values|
+                scope_columns.length == 1 ? [ values ] : values
+              end
+            end
+
+          updated_count = 0
+
+          scope_values.each do |values|
+            relation.transaction do
+              scoped = scope_columns.empty? ? relation : relation.where(scope_columns.zip(values).to_h)
+              records = scoped.lock.order(*order_args).to_a
+              next if records.empty?
+
+              keys = FractionalIndexer.generate_keys(count: records.size)
+              records.each.with_index do |record, index|
+                record.update_columns(field => keys[index])
+              end
+
+              updated_count += records.size
+            end
+          end
+
+          updated_count
+        end
       end
 
       private

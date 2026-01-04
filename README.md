@@ -210,6 +210,23 @@ If you need retries, use the method form and pass `challenge` there:
 task.set_position_between(tasks.first, tasks.last, challenge: 15)
 ```
 
+### Bulk reorder
+
+When you need to reset all positions (for example, after importing data or migrating from another ordering gem), use `reorder_<field>`. It accepts the same arguments as ActiveRecord's `order` and reassigns sequential fractional keys in that order.
+
+```ruby
+# default: order by position ASC
+Task.reorder_position
+
+# order by a different column
+Task.reorder_position(:rank)
+
+# order by multiple columns
+Task.reorder_position(:rank, created_at: :desc)
+```
+
+If you have scopes configured, it reorders within each scope group. Updates run in transactions and lock the scope rows to avoid concurrent conflicts.
+
 #### Absolute ordering with *_index
 
 If you already know the final order (for example, a drag-and-drop list form), you can submit 0-based indexes (0 is the first item) and let Narabikae map them to fractional keys:
