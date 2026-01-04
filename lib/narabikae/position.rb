@@ -88,7 +88,12 @@ module Narabikae
       return find_position_before(next_target, challenge: challenge) if prev_target.blank?
       return find_position_after(prev_target, challenge: challenge)  if next_target.blank?
 
-      prev_key, next_key = [ extract_target_key(prev_target), extract_target_key(next_target) ].minmax
+      prev_key = extract_target_key(prev_target)
+      next_key = extract_target_key(next_target)
+      return find_position_before(next_target, challenge: challenge) if prev_key.blank?
+      return find_position_after(prev_target, challenge: challenge) if next_key.blank?
+
+      prev_key, next_key = [ prev_key, next_key ].minmax
       key = FractionalIndexer.generate_key(
               prev_key: prev_key,
               next_key: next_key,

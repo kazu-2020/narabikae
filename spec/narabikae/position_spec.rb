@@ -468,6 +468,38 @@ describe Narabikae::Position do
       it { is_expected.to eq('a0V') }
     end
 
+    context 'when prev_target has nil position' do
+      let(:position) {
+        described_class.new(
+          Task.new,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
+        )
+      }
+      let(:prev_target) { Task.new(position: nil) }
+      let(:next_target) { Task.new(position: 'a0') }
+
+      it { is_expected.to eq('Zz') }
+    end
+
+    context 'when next_target has nil position' do
+      let(:position) {
+        described_class.new(
+          Task.new,
+          Narabikae::Option.new(
+            field: :position,
+            key_max_size: 30
+          )
+        )
+      }
+      let(:prev_target) { Task.new(position: 'a0') }
+      let(:next_target) { Task.new(position: nil) }
+
+      it { is_expected.to eq('a1') }
+    end
+
     context 'when prev_target has invalid position and next_target has invalid position ' do
       let(:position) {
         described_class.new(

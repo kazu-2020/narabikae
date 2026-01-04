@@ -2,7 +2,7 @@ module Narabikae
   class Configuration
     # Sets the base value for FractionalIndexer configuration.
     #
-    # @param int [Integer] The base value can be 10, 62, 94, with the default being 94.
+    # @param int [Integer] The base value can be 10, 62, 94, with the default being 62.
     # @return [void]
     def base=(int)
       FractionalIndexer.configure do |config|
