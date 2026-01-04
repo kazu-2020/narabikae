@@ -232,10 +232,13 @@ If you have scopes configured, it reorders within each scope group. Updates run 
 If you already know the final order (for example, a drag-and-drop list form), you can submit 0-based indexes (0 is the first item) and let Narabikae map them to fractional keys:
 
 ```ruby
+task.position_index # => 0
 task.position_index = 0
 task.set_position_index("1")
 task.move_to_position_index(2)
 ```
+
+`position_index` returns the 0-based index of the record within its scope, calculated from its fractional key.
 
 Example with nested attributes (each item has a `position_index` field in the form payload):
 

@@ -137,6 +137,18 @@ describe 'move_to_<field>_xxx' do
     end
   end
 
+  describe '<field>_index' do
+    let!(:first) { Sample.create } # position: 'a0'
+    let!(:second) { Sample.create } # position: 'a1'
+    let!(:third) { Sample.create } # position: 'a2'
+
+    it 'returns the 0-based index for the current position' do
+      expect(first.position_index).to eq(0)
+      expect(second.position_index).to eq(1)
+      expect(third.position_index).to eq(2)
+    end
+  end
+
   describe 'set_<field>_after' do
     subject { current.set_position_after(target) }
 

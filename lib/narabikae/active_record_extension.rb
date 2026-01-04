@@ -52,6 +52,10 @@ module Narabikae
       true
     end
 
+    def index
+      position_generator.index
+    end
+
     def set_index(index)
       key = position_generator.find_position_at(index)
       return false if key.blank?

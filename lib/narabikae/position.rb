@@ -116,6 +116,17 @@ module Narabikae
       extract_target_key(target)
     end
 
+    # Returns the positional index for the current record within its scope.
+    #
+    # @return [Integer, nil]
+    def index
+      key = record.send(option.field)
+      return if key.blank?
+
+      scoped = model.merge(model_scope)
+      scoped.where(model.arel_table[option.field].lt(key)).count
+    end
+
     private
 
     attr_reader :record, :option

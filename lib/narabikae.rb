@@ -80,6 +80,11 @@ module Narabikae
           extension.set_between(prev_target, next_target)
         end
 
+        define_method :"#{field}_index" do
+          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension.index
+        end
+
         define_method :"set_#{field}_index" do |value|
           extension = Narabikae::ActiveRecordExtension.new(self, option)
           extension.set_index(value.to_i)
