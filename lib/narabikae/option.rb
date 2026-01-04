@@ -6,12 +6,12 @@ module Narabikae
     #
     # @param field [Symbol]
     # @param key_max_size [Integer] The maximum size of the key.
-    # @param scope [Array<Symbol>] The scope of the option.
+    # @param scope [Symbol, Array<Symbol>] The scope of the option.
     # @param default_position [Symbol] The default position when creating or auto setting.
     def initialize(field:, key_max_size:, scope: [], default_position: :last)
       @field = field.to_sym
       @key_max_size = key_max_size.to_i
-      @scope = scope.is_a?(Array) ? scope.map(&:to_sym) : []
+      @scope = Array.wrap(scope).map(&:to_sym)
       @default_position = (default_position || :last).to_sym
 
       unless %i[first last].include?(@default_position)

@@ -123,8 +123,7 @@ module Narabikae
       key = record.send(option.field)
       return if key.blank?
 
-      scoped = model.merge(model_scope)
-      scoped.where(model.arel_table[option.field].lt(key)).count
+      model.merge(model_scope).where(model.arel_table[option.field].lt(key)).count
     end
 
     private

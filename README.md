@@ -275,7 +275,7 @@ end
 class Chapter < ApplicationRecord
   belongs_to :course
 
-  narabikae :position, size: 100, scope: %i[course_id]
+  narabikae :position, size: 100, scope: :course_id
 end
 
 course = Course.create
