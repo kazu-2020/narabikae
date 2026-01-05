@@ -30,6 +30,24 @@ describe 'Callbacks' do
       end
     end
 
+    context 'when the record is created with a preset position' do
+      before do
+        Chapter.narabikae :position, size: 500, scope: %i[course_id]
+      end
+
+      let(:course) { Course.create(name: 'Course A') }
+      let(:chapter) { course.chapters.build(title: 'Chapter 1') }
+
+      before do
+        chapter.position = 'a5'
+        chapter.save!
+      end
+
+      it 'keeps the provided position' do
+        expect(chapter.position).to eq('a5')
+      end
+    end
+
     context 'when the records are created' do
       before do
         Chapter.narabikae :position, size: 500

@@ -35,15 +35,10 @@ module Narabikae
                    Narabikae::Option.new(field: field, key_max_size: size, scope: scope, default_position: default_position)
                  )
 
-        before_create do
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
-          extension.set_position(option.default_position)
-        end
-
-        before_update do
+        before_save -> {
           extension = Narabikae::ActiveRecordExtension.new(self, option)
           extension.set_position(option.default_position) if extension.auto_set_position?
-        end
+        }
 
         define_method :"set_#{field}_after" do |target = nil, **args|
           extension = Narabikae::ActiveRecordExtension.new(self, option)
