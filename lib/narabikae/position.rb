@@ -108,26 +108,6 @@ module Narabikae
       nil
     end
 
-    # Returns the position key for a 0-based index.
-    #
-    # @param index [Integer]
-    # @return [String, nil]
-    def find_position_at(index)
-      return if index.nil?
-
-      FractionalIndexer.generate_keys(count: index + 1).last
-    end
-
-    # Returns the positional index for the current record within its scope.
-    #
-    # @return [Integer, nil]
-    def index
-      key = record.send(option.field)
-      return if key.blank?
-
-      model.merge(model_scope).where(model.arel_table[option.field].lt(key)).count
-    end
-
     private
 
     attr_reader :record, :option

@@ -6,7 +6,7 @@ describe 'Composite primary key models' do
     CompositeTask.narabikae :position, size: 100, scope: %i[account_id]
   end
 
-  describe 'auto-positioning and indexes' do
+  describe 'auto-positioning' do
     it 'assigns positions within the composite key scope' do
       first = CompositeTask.create!(account_id: 1, task_id: 1)
       second = CompositeTask.create!(account_id: 1, task_id: 2)
@@ -15,8 +15,6 @@ describe 'Composite primary key models' do
       expect(first.position).to eq('a0')
       expect(second.position).to eq('a1')
       expect(other_scope.position).to eq('a0')
-      expect(second.position_index).to eq(1)
-      expect(other_scope.position_index).to eq(0)
     end
   end
 

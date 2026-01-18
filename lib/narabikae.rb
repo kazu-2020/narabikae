@@ -75,17 +75,6 @@ module Narabikae
           extension.set_between(prev_target, next_target)
         end
 
-        define_method :"#{field}_index" do
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
-          extension.index
-        end
-
-        define_method :"set_#{field}_index" do |value|
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
-          extension.set_index(value.to_i)
-        end
-        alias_method :"#{field}_index=", :"set_#{field}_index"
-
         define_method :"move_to_#{field}_after" do |target = nil, **args|
           extension = Narabikae::ActiveRecordExtension.new(self, option)
           extension.move_to_after(target, **args)
@@ -99,11 +88,6 @@ module Narabikae
         define_method :"move_to_#{field}_between" do |prev_target = nil, next_target = nil, **args|
           extension = Narabikae::ActiveRecordExtension.new(self, option)
           extension.move_to_between(prev_target, next_target, **args)
-        end
-
-        define_method :"move_to_#{field}_index" do |value|
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
-          extension.move_to_index(value.to_i)
         end
 
         define_singleton_method :"reorder_#{field}" do |*order_args, **order_kwargs|

@@ -50,17 +50,6 @@ module Narabikae
       record.send("#{option.field}=", new_position)
     end
 
-    def index
-      position_generator.index
-    end
-
-    def set_index(index)
-      key = position_generator.find_position_at(index)
-      return false if key.blank?
-
-      record.send("#{option.field}=", key)
-    end
-
     def move_to_after(target, **args)
       return false unless set_after(target, **args)
 
@@ -75,12 +64,6 @@ module Narabikae
 
     def move_to_between(prev_target, next_target, **args)
       return false unless set_between(prev_target, next_target, **args)
-
-      record.save
-    end
-
-    def move_to_index(index)
-      return false unless set_index(index)
 
       record.save
     end

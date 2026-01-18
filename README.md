@@ -227,41 +227,6 @@ Task.reorder_position(:rank, created_at: :desc)
 
 If you have scopes configured, it reorders within each scope group. Updates run in transactions and lock the scope rows to avoid concurrent conflicts.
 
-#### Absolute ordering with *_index
-
-If you already know the final order (for example, a drag-and-drop list form), you can submit 0-based indexes (0 is the first item) and let Narabikae map them to fractional keys:
-
-```ruby
-task.position_index # => 0
-task.position_index = 0
-task.set_position_index("1")
-task.move_to_position_index(2)
-```
-
-`position_index` returns the 0-based index of the record within its scope, calculated from its fractional key.
-
-Example with nested attributes (each item has a `position_index` field in the form payload):
-
-```ruby
-# controller
-def project_params
-  params.require(:project).permit(tasks_attributes: %i[id name position_index])
-end
-
-# params payload
-# {
-#   project: {
-#     tasks_attributes: [
-#       { id: 1, name: "task-1", position_index: 0 },
-#       { id: 2, name: "task-2", position_index: 1 }
-#     ]
-#   }
-# }
-```
-
-> [!NOTE]
-> If you have a unique index on the position column, make it deferrable (Rails: `deferrable: :deferred`) so the batch update can succeed inside a transaction. When using `*_index`, include every item in the scope in the form, ensure indexes are 0..(n-1), and validate that each `position_index` is unique.
-
 ### Scope
 
 You can use this when you want to manage independent positions within specific scopes, such as foreign keys.
