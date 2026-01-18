@@ -116,6 +116,12 @@ describe Narabikae::Position do
       it { is_expected.to eq('a2') }
     end
 
+    context 'when target is a position key string' do
+      let(:target) { 'a1' }
+
+      it { is_expected.to eq('a2') }
+    end
+
     context 'when target has invalid position' do
       let(:target) { Task.new(position: 'invalid') }
 
@@ -233,6 +239,16 @@ describe Narabikae::Position do
       it 'raises a descriptive model mismatch error' do
         expect { subject }.to raise_error(Narabikae::Error) { |error|
           expect(error.message).to include('table', 'tasks', 'courses')
+        }
+      end
+    end
+
+    context 'when target is not a record or position key' do
+      let(:target) { 1 }
+
+      it 'raises a descriptive target type error' do
+        expect { subject }.to raise_error(Narabikae::Error) { |error|
+          expect(error.message).to include('position key')
         }
       end
     end

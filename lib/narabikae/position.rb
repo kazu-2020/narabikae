@@ -28,7 +28,7 @@ module Narabikae
     # a new key is generated until the challenge count reaches the limit.
     # challenge count is 10 by default.
     #
-    # @param target [Integer, String, #send(field)]
+    # @param target [ActiveRecord::Base, String]
     # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [String, nil] The generated key for the position after the target, or nil if no valid position is found.
     def find_position_after(target, challenge: 10)
@@ -58,7 +58,7 @@ module Narabikae
     #   position = Position.new
     #   position.find_position_before(target, challenge: 5)
     #
-    # @param target [Integer, String, #send(field)]
+    # @param target [ActiveRecord::Base, String]
     # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [String, nil] The generated key for the position before the target, or nil if no valid position is found.
     def find_position_before(target, challenge: 10)
@@ -80,8 +80,8 @@ module Narabikae
 
     # Finds the position between two targets.
     #
-    # @param prev_target [Integer, String, #send(field)] The previous target.
-    # @param next_target [Integer, String, #send(field)] The next target.
+    # @param prev_target [ActiveRecord::Base, String] The previous target.
+    # @param next_target [ActiveRecord::Base, String] The next target.
     # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [string, nil] The position between the two targets, or nil if no valid position is found.
     def find_position_between(prev_target, next_target, challenge: 10)
@@ -173,7 +173,10 @@ module Narabikae
 
     def extract_target_key(target)
       return if target.nil?
-      target = model.find(target) unless target.is_a?(ActiveRecord::Base)
+      return target if target.is_a?(String)
+      unless target.is_a?(ActiveRecord::Base)
+        raise Narabikae::Error, 'target must be an ActiveRecord object or position key string'
+      end
 
       record_table = table_name_for_class(record)
       target_table = table_name_for_class(target)

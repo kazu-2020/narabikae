@@ -20,35 +20,35 @@ describe 'Composite primary key models' do
     end
   end
 
-  describe 'composite id inputs' do
-    context 'when setting position after an id array' do
+  describe 'composite position inputs' do
+    context 'when setting position after a position key' do
       let!(:current) { CompositeTask.create!(account_id: 1, task_id: 1) }
       let!(:target) { CompositeTask.create!(account_id: 1, task_id: 2) }
 
-      it 'accepts composite ids' do
-        expect(current.set_position_after(target.id)).to eq('a2')
+      it 'accepts position keys' do
+        expect(current.set_position_after(target.position)).to eq('a2')
         expect(current.position).to eq('a2')
         expect(current.reload.position).to eq('a0')
       end
     end
 
-    context 'when moving after an id array' do
+    context 'when moving after a record' do
       let!(:current) { CompositeTask.create!(account_id: 1, task_id: 1) }
       let!(:target) { CompositeTask.create!(account_id: 1, task_id: 2) }
 
-      it 'persists changes using composite ids' do
-        expect(current.move_to_position_after(target.id, challenge: 0)).to eq(true)
+      it 'persists changes using records' do
+        expect(current.move_to_position_after(target, challenge: 0)).to eq(true)
         expect(current.reload.position).to eq('a2')
       end
     end
 
-    context 'when using the between setter with composite ids' do
+    context 'when using the between setter with position keys' do
       let!(:current) { CompositeTask.create!(account_id: 1, task_id: 1) }
       let!(:prev_target) { CompositeTask.create!(account_id: 1, task_id: 2) }
       let!(:next_target) { CompositeTask.create!(account_id: 1, task_id: 3) }
 
-      it 'accepts a hash payload of id arrays' do
-        current.position_between = { prev: prev_target.id, next: next_target.id }
+      it 'accepts a hash payload of position keys' do
+        current.position_between = { prev: prev_target.position, next: next_target.position }
 
         expect(current.position).to eq('a1V')
         expect(current.reload.position).to eq('a0')

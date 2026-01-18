@@ -191,17 +191,17 @@ target.position_between = [tasks.first, tasks.last]
 
 #### Form-friendly setters
 
-The setter aliases can be used directly in forms or `assign_attributes`. They accept a target record or a record id (string or integer). For `*_between=`, you can pass an array or hash.
+The setter aliases can be used directly in forms or `assign_attributes`. They accept a target record or a position key (string). For `*_between=`, you can pass an array or hash. Primary key inputs are not accepted; do your own lookup and pass the record or its position.
 
 ```ruby
-# record id input (e.g., from a hidden field)
-task.assign_attributes(position_after: tasks.last.id)
+# position key input (e.g., from a hidden field)
+task.assign_attributes(position_after: tasks.last.position)
 
 # between using an array
 task.position_between = [tasks.first, tasks.last]
 
 # between using a hash (string or symbol keys)
-task.position_between = { prev: tasks.first.id, next: tasks.last.id }
+task.position_between = { prev: tasks.first.position, next: tasks.last.position }
 ```
 
 If you need retries, use the method form and pass `challenge` there:
