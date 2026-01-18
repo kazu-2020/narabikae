@@ -8,7 +8,7 @@ describe Narabikae::Option do
       end
 
       it 'wraps the scope into an array of symbols' do
-        expect(option.scope).to eq([:parent_id])
+        expect(option.scope).to eq([ :parent_id ])
       end
     end
   end

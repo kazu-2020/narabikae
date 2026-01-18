@@ -130,7 +130,7 @@ module Narabikae
               # Add _ prefix to all positions so on update they don't conflict with unique indexes
               manager = Arel::UpdateManager.new
               manager.table(relation.arel_table)
-              manager.set([[relation.arel_table[field], Arel::Nodes::Concat.new(Arel::Nodes.build_quoted('_'), relation.arel_table[field])]])
+              manager.set([ [ relation.arel_table[field], Arel::Nodes::Concat.new(Arel::Nodes.build_quoted("_"), relation.arel_table[field]) ] ])
               manager.where(scope_columns.zip(values).map { |(column, value)| relation.arel_table[column].eq(value) }.inject(:and)) unless scope_columns.empty?
               relation.connection.update(manager)
 

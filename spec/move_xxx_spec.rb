@@ -25,7 +25,6 @@ describe 'move_to_<field>_xxx' do
       it { is_expected.to eq true }
       it { expect { subject }.to change { current.reload.position }.from('a0').to('a2') }
     end
-
   end
 
   describe 'move_to_<field>_before' do
@@ -51,7 +50,6 @@ describe 'move_to_<field>_xxx' do
           .to(satisfy { |value| value.start_with?('a0V') && value.length == 4 })
       }
     end
-
   end
 
   describe 'move_to_<field>_between' do
@@ -87,7 +85,6 @@ describe 'move_to_<field>_xxx' do
       it { is_expected.to eq true }
       it { expect { subject }.to change { current.reload.position }.from('a0').to('a1V') }
     end
-
   end
 
   describe 'move_to_<field>_index' do
@@ -132,7 +129,6 @@ describe 'move_to_<field>_xxx' do
       it { expect { subject }.to change { current.position }.from('a0').to('a1') }
       it { expect { subject }.not_to change { current.reload.position } }
     end
-
   end
 
   describe 'set_<field>_before' do
@@ -147,7 +143,6 @@ describe 'move_to_<field>_xxx' do
       it { expect { subject }.to change { current.position }.from('a0').to('Zz') }
       it { expect { subject }.not_to change { current.reload.position } }
     end
-
   end
 
   describe 'set_<field>_between' do
@@ -168,7 +163,6 @@ describe 'move_to_<field>_xxx' do
       }
       it { expect { subject }.not_to change { current.reload.position } }
     end
-
   end
 
   describe 'set_<field>_index' do

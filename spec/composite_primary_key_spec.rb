@@ -66,7 +66,7 @@ describe 'Composite primary key models' do
 
       expect(updated).to eq(3)
       expect(CompositeTask.where(account_id: 1).order(:position).pluck(:name)).to eq(%w[a b])
-      expect(CompositeTask.where(account_id: 2).order(:position).pluck(:name)).to eq(['c'])
+      expect(CompositeTask.where(account_id: 2).order(:position).pluck(:name)).to eq([ 'c' ])
     end
   end
 end
