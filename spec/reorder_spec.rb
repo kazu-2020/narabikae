@@ -63,4 +63,27 @@ describe 'reorder_<field>' do
       expect(ScopedReorderSample.where(user_id: '2').order(:position).pluck(:order)).to eq(%w[c d])
     end
   end
+
+  context 'with more than one batch' do
+    before do
+      stub_const('BatchedReorderTask', Class.new(ApplicationRecord) do
+        self.table_name = 'tasks'
+      end)
+      BatchedReorderTask.narabikae :position, size: 100
+    end
+
+    it 'reorders positions across batches' do
+      names = (0...1001).map { |index| format('task-%04d', index) } # one more than in_batches of default
+      timestamp = Time.current
+
+      BatchedReorderTask.insert_all(
+        names.map { |name| { name: name, created_at: timestamp, updated_at: timestamp } }
+      )
+
+      updated = BatchedReorderTask.reorder_position(:name)
+
+      expect(updated).to eq(1001)
+      expect(BatchedReorderTask.order(:position).pluck(:name)).to eq(names)
+    end
+  end
 end
