@@ -52,5 +52,15 @@ class CreateSampleModels < ActiveRecord::Migration[7.1]
         t.timestamps
       end
       add_index :chapters, %i[course_id position], unique: true
+
+      create_table :composite_tasks, primary_key: %i[account_id task_id] do |t|
+        t.bigint :account_id, null: false
+        t.bigint :task_id, null: false
+        t.string :name
+        t.string :position, **char_config(null: false, limit: 500)
+
+        t.timestamps
+      end
+      add_index :composite_tasks, %i[account_id position], unique: true
   end
 end
