@@ -1,4 +1,4 @@
-class CreateSampleModels < ActiveRecord::Migration[7.2]
+class CreateSampleModels < ActiveRecord::Migration[7.1]
   def change
     def char_config(**options)
       case ActiveRecord::Base.connection.adapter_name
