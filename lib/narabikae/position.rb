@@ -155,7 +155,7 @@ module Narabikae
       return if target.nil?
       return target if target.is_a?(String)
       unless target.is_a?(ActiveRecord::Base)
-        raise Narabikae::Error, 'target must be an ActiveRecord object or position key string'
+        raise Narabikae::Error, "target must be an ActiveRecord object or position key string"
       end
 
       record_table = table_name_for_class(record)
