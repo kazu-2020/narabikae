@@ -159,5 +159,4 @@ describe 'move_to_<field>_xxx' do
     it { expect { subject }.to change { current.position }.from('a0').to('a1V') }
     it { expect { subject }.not_to change { current.reload.position } }
   end
-
 end
