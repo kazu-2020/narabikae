@@ -89,7 +89,6 @@ module Narabikae
           extension = Narabikae::ActiveRecordExtension.new(self, option)
           extension.move_to_between(prev_target, next_target, **args)
         end
-
       end
 
       private

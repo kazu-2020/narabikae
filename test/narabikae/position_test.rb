@@ -622,7 +622,7 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     assert key > "a0"
     assert key < "a1"
 
-    refute prev_target.position < key && key < next_target.position
+    assert_not prev_target.position < key && key < next_target.position
   end
 
   test "find_position_before retry maintains order" do
