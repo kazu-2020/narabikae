@@ -1,9 +1,6 @@
 inherit_gem:
   rubocop-rails-omakase: rubocop.yml
 
-require:
-  - rubocop-rspec
-
 AllCops:
   Exclude:
-    - 'spec/dummy/db/**/*'
+    - 'test/dummy/db/**/*'

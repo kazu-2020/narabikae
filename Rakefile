@@ -1,9 +1,47 @@
-require "bundler/setup"
-require "bundler/gem_tasks"
+# frozen_string_literal: true
 
-require 'rspec/core/rake_task'
-RSpec::Core::RakeTask.new(:spec) do |spec|
-  spec.pattern = FileList['spec/**/*_spec.rb']
+require "bundler/setup"
+
+APP_RAKEFILE = File.expand_path("test/dummy/Rakefile", __dir__)
+load "rails/tasks/engine.rake"
+
+if Rails::VERSION::MAJOR < 8
+  load "rails/tasks/statistics.rake"
 end
 
-task default: :spec
+require "bundler/gem_tasks"
+require "rake/tasklib"
+
+class TestHelpers < Rake::TaskLib
+  def initialize(databases)
+    @databases = databases
+    define
+  end
+
+  def define
+    desc "Run tests for all databases (mysql, postgres, sqlite)"
+    task :test do
+      @databases.each { |database| run_test_for_database(database) }
+    end
+
+    namespace :test do
+      @databases.each do |database|
+        desc "Run tests for #{database} database"
+        task database do
+          run_test_for_database(database)
+        end
+      end
+    end
+  end
+
+  private
+
+  def run_test_for_database(database)
+    sh("TARGET_DB=#{database} RAILS_ENV=test bin/rails db:setup")
+    sh("TARGET_DB=#{database} bin/rails test")
+  end
+end
+
+TestHelpers.new(%w[ mysql postgres sqlite ])
+
+task default: :test

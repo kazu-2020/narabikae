@@ -269,6 +269,53 @@ ticket.move_to_position_between(t1, t2, challenge: 15)
 
 Feel free to message me on Github (kazu-2020)
 
+## Development
+
+### Supported versions (tested in CI)
+
+- Ruby 3.1, 3.2, 3.3, 3.4, 4.0
+- Rails 7.1, 7.2, 8.0, 8.1, and Rails main (via `railties` from `rails/rails`)
+
+### Test suite
+
+Tests are Minitest-based and run against a dummy Rails app located at `test/dummy`.
+
+Database targets:
+
+- `TARGET_DB=mysql` (default)
+- `TARGET_DB=postgres`
+- `TARGET_DB=sqlite`
+
+To spin up database services locally:
+
+```sh
+docker compose up -d
+```
+
+Run the full matrix locally (all databases):
+
+```sh
+bundle exec rake test
+```
+
+Run a single database:
+
+```sh
+bundle exec rake test:postgres
+```
+
+Run tests directly with Rails for a specific target:
+
+```sh
+TARGET_DB=sqlite bin/rails test
+```
+
+To test against a specific Rails version:
+
+```sh
+BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile TARGET_DB=mysql bundle exec rake test
+```
+
 ## Contributing
 
 Please wait a moment... 🙏
