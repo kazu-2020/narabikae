@@ -37,4 +37,4 @@ development:
 test:
   primary:
     <<: *default
-    database: <%= database_name_from("test") %>
+    database: <%= database_name_from("narabikae_test") %>
