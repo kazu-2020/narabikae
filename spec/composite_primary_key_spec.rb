@@ -53,5 +53,4 @@ describe 'Composite primary key models' do
       end
     end
   end
-
 end
