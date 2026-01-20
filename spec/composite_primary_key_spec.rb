@@ -54,17 +54,4 @@ describe 'Composite primary key models' do
     end
   end
 
-  describe 'reorder_position' do
-    it 'reorders within composite key scope groups' do
-      CompositeTask.create!(account_id: 1, task_id: 1, name: 'b')
-      CompositeTask.create!(account_id: 1, task_id: 2, name: 'a')
-      CompositeTask.create!(account_id: 2, task_id: 1, name: 'c')
-
-      updated = CompositeTask.reorder_position(:name)
-
-      expect(updated).to eq(3)
-      expect(CompositeTask.where(account_id: 1).order(:position).pluck(:name)).to eq(%w[a b])
-      expect(CompositeTask.where(account_id: 2).order(:position).pluck(:name)).to eq([ 'c' ])
-    end
-  end
 end

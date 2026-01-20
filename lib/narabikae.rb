@@ -90,51 +90,6 @@ module Narabikae
           extension.move_to_between(prev_target, next_target, **args)
         end
 
-        define_singleton_method :"reorder_#{field}" do |*order_args, **order_kwargs|
-          order_args << order_kwargs if order_kwargs.any?
-          order_args = [ field ] if order_args.empty?
-
-          scope_columns = option.scope
-          relation = all
-          scope_values =
-            if scope_columns.empty?
-              [ [] ]
-            else
-              relation.distinct.pluck(*scope_columns).map do |values|
-                scope_columns.length == 1 ? [ values ] : values
-              end
-            end
-
-          updated_count = 0
-
-          scope_values.each do |values|
-            relation.transaction do
-              scoped = scope_columns.empty? ? relation : relation.where(scope_columns.zip(values).to_h)
-
-              # Add _ prefix to all positions so on update they don't conflict with unique indexes
-              manager = Arel::UpdateManager.new
-              manager.table(relation.arel_table)
-              manager.set([ [ relation.arel_table[field], Arel::Nodes::Concat.new(Arel::Nodes.build_quoted("_"), relation.arel_table[field]) ] ])
-              manager.where(scope_columns.zip(values).map { |(column, value)| relation.arel_table[column].eq(value) }.inject(:and)) unless scope_columns.empty?
-              relation.connection.update(manager)
-
-              prev_key = nil
-              scoped.order(*order_args).in_batches do |records|
-                next if records.empty?
-
-                keys = FractionalIndexer.generate_keys(prev_key: prev_key, count: records.size)
-                records.each.with_index do |record, index|
-                  record.update_columns(field => keys[index])
-                end
-
-                prev_key = keys.last
-                updated_count += records.size
-              end
-            end
-          end
-
-          updated_count
-        end
       end
 
       private
