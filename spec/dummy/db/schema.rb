@@ -21,6 +21,16 @@ ActiveRecord::Schema.define(version: 2024_09_28_051832) do
     t.index ["course_id"], name: "index_chapters_on_course_id"
   end
 
+  create_table "composite_tasks", primary_key: ["account_id", "task_id"], charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "task_id", null: false
+    t.string "name"
+    t.string "position", limit: 500, null: false, collation: "ascii_bin"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "position"], name: "index_composite_tasks_on_account_id_and_position", unique: true
+  end
+
   create_table "courses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
