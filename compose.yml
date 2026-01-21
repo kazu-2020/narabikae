@@ -1,5 +1,6 @@
 volumes:
-  db: {}
+  mysql_db: {}
+  postgres_db: {}
 
 services:
   mysql:
@@ -7,15 +8,19 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
-      - db:/var/lib/mysql
+      - type: volume
+        source: mysql_db
+        target: /var/lib/mysql
     ports:
       - "127.0.0.1:3306:3306"
 
   postgres:
-    image: postgres:15.1
+    image: postgres:17.7
     environment:
       POSTGRES_HOST_AUTH_METHOD: "trust"
     volumes:
-      - db:/var/lib/postgres
+      - type: volume
+        source: postgres_db
+        target: /var/lib/postgresql/data
     ports:
       - "127.0.0.1:5432:5432"
