@@ -1,16 +1,22 @@
 /.bundle/
 /doc/
+/gemfiles/*.lock
 /log/*.log
 /pkg/
 /tmp/
+/test/dummy/db/*.sqlite3
+/test/dummy/db/*.sqlite3-*
+/test/dummy/log/*.log*
+/test/dummy/tmp/
 
-/spec/dummy/log/*.log
-/spec/dummy/storage/
-/spec/dummy/tmp/
-/spec/dummy/narabikae_*
+# Folder for JetBrains IDEs
+/.idea/
 
-Gemfile.lock
-/gemfiles/*.gemfile.lock
+# Folder for Visual Studio Code
+/.vscode/
 
+# Files for RVM holdouts
+.ruby-gemset
 
-.mise.toml
+# misc
+.DS_Store

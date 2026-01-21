@@ -69,6 +69,10 @@ class Task < ApplicationRecord
   #       Used for validation of the internally generated order value.
   #       This value should be equivalent to
   #       the limit set in the DB column.
+  #
+  # default_position: optional
+  #       Set where new/auto-set records are inserted.
+  #       Accepts :first or :last (default).
 end
 ```
 
@@ -87,6 +91,16 @@ Task.order(:position).pluck(:name, :position)
 
 > [!NOTE]
 > The position is set using the before_create callback. Therefore, do not define validations such as presence on the attributes managed by this gem!
+
+#### Default position
+
+By default, new/auto-set records are inserted at the end of the list. To insert at the beginning instead:
+
+```rb
+class Task < ApplicationRecord
+  narabikae :position, size: 200, default_position: :first
+end
+```
 
 ## Usage Details
 
@@ -157,6 +171,45 @@ target.position
 # ex: target.move_to_position_between(tasks.first, nil)
 ```
 
+### Set without saving
+
+If you want to set the new position value and save later (for example, in a form), use `set_<field>_after/before/between`. These methods only assign the new position value and do not persist the record.
+
+```ruby
+target.set_position_after(tasks.last)
+target.position
+# => 'a3'
+target.save
+```
+
+You can also use setter-style aliases:
+
+```ruby
+target.position_after = tasks.last
+target.position_between = [tasks.first, tasks.last]
+```
+
+#### Form-friendly setters
+
+The setter aliases can be used directly in forms or `assign_attributes`. They accept a target record or a position key (string). For `*_between=`, you can pass an array or hash. Primary key inputs are not accepted; do your own lookup and pass the record or its position.
+
+```ruby
+# position key input (e.g., from a hidden field)
+task.assign_attributes(position_after: tasks.last.position)
+
+# between using an array
+task.position_between = [tasks.first, tasks.last]
+
+# between using a hash (string or symbol keys)
+task.position_between = { prev: tasks.first.position, next: tasks.last.position }
+```
+
+If you need retries, use the method form and pass `challenge` there:
+
+```ruby
+task.set_position_between(tasks.first, tasks.last, challenge: 15)
+```
+
 ### Scope
 
 You can use this when you want to manage independent positions within specific scopes, such as foreign keys.
@@ -170,7 +223,7 @@ end
 class Chapter < ApplicationRecord
   belongs_to :course
 
-  narabikae :position, size: 100, scope: %i[course_id]
+  narabikae :position, size: 100, scope: :course_id
 end
 
 course = Course.create
@@ -215,6 +268,53 @@ ticket.move_to_position_between(t1, t2, challenge: 15)
 ## Questions, Feedback
 
 Feel free to message me on Github (kazu-2020)
+
+## Development
+
+### Supported versions (tested in CI)
+
+- Ruby 3.1, 3.2, 3.3, 3.4, 4.0
+- Rails 7.1, 7.2, 8.0, 8.1, and Rails main (via `railties` from `rails/rails`)
+
+### Test suite
+
+Tests are Minitest-based and run against a dummy Rails app located at `test/dummy`.
+
+Database targets:
+
+- `TARGET_DB=mysql` (default)
+- `TARGET_DB=postgres`
+- `TARGET_DB=sqlite`
+
+To spin up database services locally:
+
+```sh
+docker compose up -d
+```
+
+Run the full matrix locally (all databases):
+
+```sh
+bundle exec rake test
+```
+
+Run a single database:
+
+```sh
+bundle exec rake test:postgres
+```
+
+Run tests directly with Rails for a specific target:
+
+```sh
+TARGET_DB=sqlite bin/rails test
+```
+
+To test against a specific Rails version:
+
+```sh
+BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile TARGET_DB=mysql bundle exec rake test
+```
 
 ## Contributing
 

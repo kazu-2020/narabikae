@@ -16,23 +16,28 @@ module Narabikae
       FractionalIndexer.generate_key(prev_key: current_last_position)
     end
 
+    # Generates a new key for the first position
+    #
+    # @return [String] The newly generated key for the first position.
+    def create_first_position
+      FractionalIndexer.generate_key(next_key: current_first_position)
+    end
+
     # Finds the position after the specified target.
     # If generated key is invalid(ex: it already exists),
     # a new key is generated until the challenge count reaches the limit.
     # challenge count is 10 by default.
     #
-    # @param target [#send(field)]
-    # @param args [Hash] Additional arguments.
-    # @option args [Integer] :challenge The number of times to attempt finding a valid position.
+    # @param target [ActiveRecord::Base, String]
+    # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [String, nil] The generated key for the position after the target, or nil if no valid position is found.
-    def find_position_after(target, **args)
-      merged_args = { challenge: 10 }.merge(args)
+    def find_position_after(target, challenge: 10)
       # when target is nil, try to generate key from the last position
-      target_key = target&.send(option.field) || current_last_position
+      target_key = extract_target_key(target) || current_last_position
       key = FractionalIndexer.generate_key(prev_key: target_key)
       return key if valid?(key)
 
-      (merged_args[:challenge] || 0).times do |i|
+      (challenge || 0).times do |i|
         key = FractionalIndexer.generate_key(prev_key: target_key, next_key: key)
         key += random_fractional
         return key if valid?(key)
@@ -53,18 +58,16 @@ module Narabikae
     #   position = Position.new
     #   position.find_position_before(target, challenge: 5)
     #
-    # @param target [#send(field)]
-    # @param args [Hash] Additional arguments.
-    # @option args [Integer] :challenge The number of times to attempt finding a valid position.
+    # @param target [ActiveRecord::Base, String]
+    # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [String, nil] The generated key for the position before the target, or nil if no valid position is found.
-    def find_position_before(target, **args)
-      merged_args = { challenge: 10 }.merge(args)
+    def find_position_before(target, challenge: 10)
       # when target is nil, try to generate key from the first position
-      target_key = target&.send(option.field) || current_first_position
+      target_key = extract_target_key(target) || current_first_position
       key = FractionalIndexer.generate_key(next_key: target_key)
       return key if valid?(key)
 
-      (merged_args[:challenge] || 0).times do |i|
+      (challenge || 0).times do |i|
         key = FractionalIndexer.generate_key(prev_key: key, next_key: target_key)
         key += random_fractional
         return key if valid?(key)
@@ -77,25 +80,24 @@ module Narabikae
 
     # Finds the position between two targets.
     #
-    # @param prev_target [#send(field)] The previous target.
-    # @param next_target [#send(field)] The next target.
-    # @param args [Hash] Additional arguments.
-    # @option args [Integer] :challenge The number of times to attempt finding a valid position.
+    # @param prev_target [ActiveRecord::Base, String] The previous target.
+    # @param next_target [ActiveRecord::Base, String] The next target.
+    # @param challenge [Integer] The number of times to attempt finding a valid position.
     # @return [string, nil] The position between the two targets, or nil if no valid position is found.
-    def find_position_between(prev_target, next_target, **args)
-      return find_position_before(next_target, **args) if prev_target.blank?
-      return find_position_after(prev_target, **args)  if next_target.blank?
+    def find_position_between(prev_target, next_target, challenge: 10)
+      prev_key = extract_target_key(prev_target)
+      next_key = extract_target_key(next_target)
+      return find_position_before(next_target, challenge: challenge) if prev_key.blank?
+      return find_position_after(prev_target, challenge: challenge) if next_key.blank?
 
-      merged_args = { challenge: 10 }.merge(args)
-
-      prev_key, next_key = [ prev_target.send(option.field), next_target.send(option.field) ].minmax
+      prev_key, next_key = [ prev_key, next_key ].minmax
       key = FractionalIndexer.generate_key(
               prev_key: prev_key,
               next_key: next_key,
             )
       return key if valid?(key)
 
-      (merged_args[:challenge] || 0).times do |i|
+      (challenge || 0).times do |i|
         key = FractionalIndexer.generate_key(prev_key: key, next_key: next_key)
         key += random_fractional
         return key if valid?(key)
@@ -123,7 +125,7 @@ module Narabikae
     end
 
     def model
-      record.class.base_class
+      record.class.base_class.unscoped
     end
 
     # generate a random fractional part
@@ -147,6 +149,44 @@ module Narabikae
       return false if key.blank?
 
       capable?(key) && uniq?(key)
+    end
+
+    def extract_target_key(target)
+      return if target.nil?
+      return target if target.is_a?(String)
+      unless target.is_a?(ActiveRecord::Base)
+        raise Narabikae::Error, "target must be an ActiveRecord object or position key string"
+      end
+
+      record_table = table_name_for_class(record)
+      target_table = table_name_for_class(target)
+      unless target_table && record_table && target_table == record_table
+        raise Narabikae::Error,
+              "target model mismatch: expected table #{record_table || 'unknown'}, got #{target_table || 'unknown'}"
+      end
+
+      mismatched_columns = mismatched_scope_columns(target)
+      if mismatched_columns.any?
+        raise Narabikae::Error, "target scope mismatch for columns: #{mismatched_columns.join(', ')}"
+      end
+      raise Narabikae::Error, "target missing #{option.field} field" unless target.respond_to?(option.field)
+
+      target.send(option.field)
+    end
+
+    def table_name_for_class(value)
+      klass = value.class
+      return unless klass.respond_to?(:table_name)
+
+      klass.table_name
+    end
+
+    def mismatched_scope_columns(target)
+      option.scope.select do |column|
+        !target.respond_to?(column) ||
+          !record.respond_to?(column) ||
+          target.public_send(column) != record.public_send(column)
+      end
     end
   end
 end

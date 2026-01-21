@@ -29,20 +29,50 @@ module Narabikae
     extend ActiveSupport::Concern
 
     class_methods do
-      def narabikae(field = :position, size:, scope: [])
+      def narabikae(field = :position, size:, scope: [], default_position: :last)
         option = narabikae_option_store.register!(
                    field.to_sym,
-                   Narabikae::Option.new(field: field, key_max_size: size, scope: scope)
+                   Narabikae::Option.new(field: field, key_max_size: size, scope: scope, default_position: default_position)
                  )
 
-        before_create do
+        before_save -> {
           extension = Narabikae::ActiveRecordExtension.new(self, option)
-          extension.set_position
-        end
+          extension.set_position(option.default_position) if extension.auto_set_position?
+        }
 
-        before_update do
+        define_method :"set_#{field}_after" do |target = nil, **args|
           extension = Narabikae::ActiveRecordExtension.new(self, option)
-          extension.set_position if extension.auto_set_position?
+          extension.set_after(target, **args)
+        end
+        alias_method :"#{field}_after=", :"set_#{field}_after"
+
+        define_method :"set_#{field}_before" do |target = nil, **args|
+          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension.set_before(target, **args)
+        end
+        alias_method :"#{field}_before=", :"set_#{field}_before"
+
+        define_method :"set_#{field}_between" do |prev_target = nil, next_target = nil, **args|
+          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension.set_between(prev_target, next_target, **args)
+        end
+        define_method :"#{field}_between=" do |value|
+          prev_target = nil
+          next_target = nil
+
+          case value
+          when Array
+            prev_target, next_target = value
+          when Hash
+            payload = value.with_indifferent_access
+            prev_target = payload[:prev_target] || payload[:prev]
+            next_target = payload[:next_target] || payload[:next]
+          else
+            prev_target = value
+          end
+
+          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension.set_between(prev_target, next_target)
         end
 
         define_method :"move_to_#{field}_after" do |target = nil, **args|

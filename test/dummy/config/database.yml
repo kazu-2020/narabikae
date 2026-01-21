@@ -1,0 +1,40 @@
+<% def database_name_from(name); ENV["TARGET_DB"] == "sqlite" ? "db/#{name}.sqlite3" : name; end %>
+
+<% if ENV["TARGET_DB"] == "sqlite" %>
+default: &default
+  adapter: sqlite3
+  pool: 50
+  <% if Rails::VERSION::MAJOR >= 8 %>
+  timeout: 5000
+  <% else %>
+  retries: 100 # "retries" is deprecated in rails 8 and will be removed in rails 8.1
+  <% end %>
+
+<% elsif ENV["TARGET_DB"] == "postgres" %>
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  username: postgres
+  pool: 20
+  host: "127.0.0.1"
+  port: 5432
+  gssencmode: disable # https://github.com/ged/ruby-pg/issues/311
+
+<% else %>
+default: &default
+  adapter: mysql2
+  username: root
+  pool: 20
+  host: "127.0.0.1"
+  port: 3306
+<% end %>
+
+development:
+  primary:
+    <<: *default
+    database: <%= database_name_from("development") %>
+
+test:
+  primary:
+    <<: *default
+    database: <%= database_name_from("narabikae_test") %>
