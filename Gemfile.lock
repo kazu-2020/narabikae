@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    narabikae (0.2.1)
+    narabikae (0.3.0)
       activerecord (>= 7.1)
       fractional_indexer (>= 0.4.0)
       railties (>= 7.1)
