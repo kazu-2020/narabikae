@@ -1,4 +1,5 @@
 module Narabikae
+  # Position class handles the low-level calculation of fractional index positions.
   class Position
     attr_reader :indexer, :record, :config, :field
 
@@ -121,19 +122,28 @@ module Narabikae
 
     private
 
+    # Checks if the key size is within the allowed maximum.
+    # @param key [String]
+    # @return [Boolean]
     def capable?(key)
       return false if key.nil?
       config.key_max_size >= key.size
     end
 
+    # Returns the first position in the current scope.
+    # @return [String, nil]
     def current_first_position
       model.merge(model_scope).minimum(field)
     end
 
+    # Returns the last position in the current scope.
+    # @return [String, nil]
     def current_last_position
       model.merge(model_scope).maximum(field)
     end
 
+    # Returns the base class of the record, unscoped.
+    # @return [ActiveRecord::Relation]
     def model
       record.class.base_class.unscoped
     end
@@ -147,20 +157,33 @@ module Narabikae
       @indexer.digits[1..].sample
     end
 
+    # Returns the scope relation for the model.
+    # @return [ActiveRecord::Relation]
     def model_scope
       model.where(record.slice(*config.scope))
     end
 
+    # Checks if the key is unique within the scope.
+    # @param key [String]
+    # @return [Boolean]
     def uniq?(key)
       model.where(field => key).merge(model_scope).empty?
     end
 
+    # Checks if the key is valid (not blank, capable, and unique).
+    # @param key [String]
+    # @return [Boolean]
     def valid?(key)
       return false if key.blank?
 
       capable?(key) && uniq?(key)
     end
 
+    # Extracts the position key from a target (record or string).
+    #
+    # @param target [ActiveRecord::Base, String, nil]
+    # @raise [Narabikae::Error] If target is invalid.
+    # @return [String, nil]
     def extract_target_key(target)
       return if target.nil?
       return target if target.is_a?(String)
@@ -184,6 +207,9 @@ module Narabikae
       target.send(field)
     end
 
+    # Returns the table name for a class or instance.
+    # @param value [Object]
+    # @return [String, nil]
     def table_name_for_class(value)
       klass = value.class
       return unless klass.respond_to?(:table_name)
@@ -191,6 +217,9 @@ module Narabikae
       klass.table_name
     end
 
+    # Identifies columns where the target's scope values differ from the record's.
+    # @param target [ActiveRecord::Base]
+    # @return [Array<Symbol>]
     def mismatched_scope_columns(target)
       config.scope.select do |column|
         !target.respond_to?(column) ||

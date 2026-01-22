@@ -3,9 +3,12 @@
 require_relative "fractional_indexer/order_key"
 
 module Narabikae
+  # FractionalIndexer provides logic for generating fractional index keys.
   class FractionalIndexer
+    # Error raised by FractionalIndexer.
     class Error < StandardError; end
 
+    # Supported bases and their corresponding digit characters.
     DIGITS_LIST = {
       10 => ("0".."9").to_a,
       62 => ("0".."9").to_a + ("A".."Z").to_a + ("a".."z").to_a,
@@ -14,11 +17,20 @@ module Narabikae
 
     attr_reader :base, :digits
 
+    # Initializes a new instance of FractionalIndexer.
+    #
+    # @param base [Integer] The base for fractional indexing (10, 62, or 94).
     def initialize(base: 62)
       @base = base
       @digits = DIGITS_LIST[base]
     end
 
+    # Generates a new fractional index key.
+    #
+    # @param prev_key [String, nil] The key of the previous item.
+    # @param next_key [String, nil] The key of the next item.
+    # @raise [Error] If keys are empty or in invalid order.
+    # @return [String, nil] The newly generated key.
     def generate_key(prev_key: nil, next_key: nil)
       return OrderKey.new(:zero, indexer: self).key if prev_key.nil? && next_key.nil?
 
@@ -46,6 +58,12 @@ module Narabikae
       end
     end
 
+    # Generates multiple fractional index keys.
+    #
+    # @param prev_key [String, nil] The key of the previous item.
+    # @param next_key [String, nil] The key of the next item.
+    # @param count [Integer] The number of keys to generate.
+    # @return [Array<String>] The generated keys.
     def generate_keys(prev_key: nil, next_key: nil, count: 1)
       return [] if count <= 0
       return [ generate_key(prev_key: prev_key, next_key: next_key) ] if count == 1
@@ -82,6 +100,11 @@ module Narabikae
       ]
     end
 
+    # Decrements the given order key.
+    #
+    # @param order_key [OrderKey, String] The key to decrement.
+    # @raise [Error] If the key is the minimum possible value.
+    # @return [String, nil] The decremented key.
     def decrement(order_key)
       order_key = OrderKey.new(order_key, indexer: self) unless order_key.is_a?(OrderKey)
 
@@ -99,6 +122,10 @@ module Narabikae
       decremented_order_key.key
     end
 
+    # Increments the given order key.
+    #
+    # @param order_key [OrderKey, String] The key to increment.
+    # @return [String, nil] The incremented key.
     def increment(order_key)
       order_key = OrderKey.new(order_key, indexer: self) unless order_key.is_a?(OrderKey)
 
@@ -107,6 +134,9 @@ module Narabikae
       execute_increment(order_key)
     end
 
+    # Low-level decrement execution.
+    # @param order_key [OrderKey]
+    # @return [String, nil]
     def execute_decrement(order_key)
       prefix, *digs = order_key.integer.chars
       borrow = true
@@ -135,6 +165,9 @@ module Narabikae
       new_key + digs.join
     end
 
+    # Low-level increment execution.
+    # @param order_key [OrderKey]
+    # @return [String, nil]
     def execute_increment(order_key)
       prefix, *digs = order_key.integer.chars
       carry = true
@@ -165,6 +198,11 @@ module Narabikae
 
     private
 
+    # Calculates the midpoint between two position strings.
+    #
+    # @param prev_pos [String, nil]
+    # @param next_pos [String, nil]
+    # @return [String]
     def midpoint(prev_pos, next_pos)
       prev_pos = prev_pos.to_s
       next_pos = next_pos.to_s
@@ -202,6 +240,12 @@ module Narabikae
       end
     end
 
+    # Validates position strings.
+    #
+    # @param prev_pos [String]
+    # @param next_pos [String]
+    # @raise [Error] If validation fails.
+    # @return [void]
     def validate_positions!(prev_pos, next_pos)
       raise Error, "prev_pos must be less than next_pos" if !next_pos.empty? && prev_pos >= next_pos
 

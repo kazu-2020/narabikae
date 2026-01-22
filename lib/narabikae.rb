@@ -10,19 +10,35 @@ require "active_support"
 require "active_support/ordered_options"
 require "active_record"
 
+# Narabikae is a Ruby gem that provides fractional indexing for ActiveRecord models.
 module Narabikae
   mattr_accessor :config, default: Narabikae::Configuration.new
 
+  # Configures the global defaults for Narabikae.
+  #
+  # @yield [config] The global configuration object.
+  # @return [void]
   def self.configure
     yield config
   end
 
   class Error < StandardError; end
 
+  # Extension module to be included in ActiveRecord::Base.
   module Extension
     extend ActiveSupport::Concern
 
     class_methods do
+      # Enables fractional indexing for the model.
+      #
+      # @param field [Symbol] The field name used for ordering (default: :position).
+      # @param options [Hash] Configuration overrides.
+      # @option options [Integer] :size The maximum size of the fractional index key (alias for :key_max_size).
+      # @option options [Integer] :key_max_size The maximum size of the fractional index key.
+      # @option options [Array<Symbol>, Symbol] :scope The scope columns for ordering.
+      # @option options [Symbol] :default_position The default position (:first or :last).
+      # @option options [Integer] :base The base for fractional indexing (10, 62, or 94).
+      # @return [void]
       def narabikae(field = :position, **options)
         field = field.to_sym
 
@@ -93,6 +109,8 @@ module Narabikae
 
       private
 
+      # Returns the option store for the model.
+      # @return [Narabikae::OptionStore]
       def narabikae_option_store
         @_narabikae_option_store ||= Narabikae::OptionStore.new
       end
