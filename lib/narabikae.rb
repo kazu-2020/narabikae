@@ -2,58 +2,58 @@ require "narabikae/version"
 
 require "narabikae/active_record_extension"
 require "narabikae/configuration"
-require "narabikae/option"
 require "narabikae/option_store"
 require "narabikae/position"
 
-require "fractional_indexer"
+require "narabikae/fractional_indexer"
 require "active_support"
+require "active_support/ordered_options"
 require "active_record"
 
 module Narabikae
-  class Error < StandardError; end
-
-  @configuration = Narabikae::Configuration.new
+  mattr_accessor :config, default: Narabikae::Configuration.new
 
   def self.configure
-    yield configuration if block_given?
-
-    configuration
+    yield config
   end
 
-  def self.configuration
-    @configuration
-  end
+  class Error < StandardError; end
 
   module Extension
     extend ActiveSupport::Concern
 
     class_methods do
-      def narabikae(field = :position, size:, scope: [], default_position: :last)
-        option = narabikae_option_store.register!(
-                   field.to_sym,
-                   Narabikae::Option.new(field: field, key_max_size: size, scope: scope, default_position: default_position)
-                 )
+      def narabikae(field = :position, **options)
+        field = field.to_sym
+
+        if options.key?(:size)
+          options[:key_max_size] = options.delete(:size)
+        end
+
+        config = narabikae_option_store.register!(
+                          field,
+                          Narabikae::Configuration.new(**Narabikae.config, **options)
+                        )
 
         before_save -> {
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
-          extension.set_position(option.default_position) if extension.auto_set_position?
+          extension = Narabikae::ActiveRecordExtension.new(self, field, config)
+          extension.set_position(config.default_position) if extension.auto_set_position?
         }
 
         define_method :"set_#{field}_after" do |target = nil, **args|
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension = Narabikae::ActiveRecordExtension.new(self, field, config)
           extension.set_after(target, **args)
         end
         alias_method :"#{field}_after=", :"set_#{field}_after"
 
         define_method :"set_#{field}_before" do |target = nil, **args|
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension = Narabikae::ActiveRecordExtension.new(self, field, config)
           extension.set_before(target, **args)
         end
         alias_method :"#{field}_before=", :"set_#{field}_before"
 
         define_method :"set_#{field}_between" do |prev_target = nil, next_target = nil, **args|
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension = Narabikae::ActiveRecordExtension.new(self, field, config)
           extension.set_between(prev_target, next_target, **args)
         end
         define_method :"#{field}_between=" do |value|
@@ -71,22 +71,22 @@ module Narabikae
             prev_target = value
           end
 
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension = Narabikae::ActiveRecordExtension.new(self, field, config)
           extension.set_between(prev_target, next_target)
         end
 
         define_method :"move_to_#{field}_after" do |target = nil, **args|
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension = Narabikae::ActiveRecordExtension.new(self, field, config)
           extension.move_to_after(target, **args)
         end
 
         define_method :"move_to_#{field}_before" do |target = nil, **args|
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension = Narabikae::ActiveRecordExtension.new(self, field, config)
           extension.move_to_before(target, **args)
         end
 
         define_method :"move_to_#{field}_between" do |prev_target = nil, next_target = nil, **args|
-          extension = Narabikae::ActiveRecordExtension.new(self, option)
+          extension = Narabikae::ActiveRecordExtension.new(self, field, config)
           extension.move_to_between(prev_target, next_target, **args)
         end
       end

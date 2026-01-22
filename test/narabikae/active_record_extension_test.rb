@@ -4,7 +4,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
   test "auto_set_position? returns true when record has invalid key" do
     instance = Narabikae::ActiveRecordExtension.new(
       Task.new(position: "invalid"),
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal true, instance.auto_set_position?
@@ -13,7 +14,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
   test "auto_set_position? returns false when record has no scope" do
     instance = Narabikae::ActiveRecordExtension.new(
       Task.create!(position: "a0"),
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, instance.auto_set_position?
@@ -22,7 +24,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
   test "auto_set_position? returns false when scoped record has no change" do
     instance = Narabikae::ActiveRecordExtension.new(
       Task.create!(position: "a0"),
-      Narabikae::Option.new(field: :position, key_max_size: 10, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10, scope: %i[user_id])
     )
 
     assert_equal false, instance.auto_set_position?
@@ -34,7 +37,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
 
     instance = Narabikae::ActiveRecordExtension.new(
       record,
-      Narabikae::Option.new(field: :position, key_max_size: 10, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10, scope: %i[user_id])
     )
 
     assert_equal true, instance.auto_set_position?
@@ -47,7 +51,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
 
     instance = Narabikae::ActiveRecordExtension.new(
       record,
-      Narabikae::Option.new(field: :position, key_max_size: 10, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10, scope: %i[user_id])
     )
 
     assert_equal false, instance.auto_set_position?
@@ -57,7 +62,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     record = Task.new
     instance = Narabikae::ActiveRecordExtension.new(
       record,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_nil record.position
@@ -70,7 +76,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     record = Task.new
     instance = Narabikae::ActiveRecordExtension.new(
       record,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     instance.set_position(:first)
@@ -82,7 +89,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     target = Task.new(position: "invalid")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, instance.set_after(target, challenge: 0)
@@ -95,7 +103,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     target = Task.create!(position: "b10abc")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal "b11", instance.set_after(target, challenge: 0)
@@ -108,7 +117,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     target = Task.new(position: "invalid")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, instance.set_before(target, challenge: nil)
@@ -121,7 +131,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     target = Task.create!(position: "b10abc")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal "b10", instance.set_before(target, challenge: nil)
@@ -135,7 +146,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     next_target = Task.new(position: "invalid")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, instance.set_between(prev_target, next_target, challenge: 5)
@@ -149,7 +161,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     next_target = Task.create!(position: "b20abc")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal "b11", instance.set_between(prev_target, next_target, challenge: 5)
@@ -162,7 +175,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     target = Task.new(position: "invalid")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, instance.move_to_after(target, challenge: 0)
@@ -174,7 +188,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     target = Task.create!(position: "b10abc")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal true, instance.move_to_after(target, challenge: 0)
@@ -186,7 +201,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     target = Task.new(position: "invalid")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, instance.move_to_before(target, challenge: nil)
@@ -198,7 +214,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     target = Task.create!(position: "b10abc")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal true, instance.move_to_before(target, challenge: nil)
@@ -211,7 +228,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     next_target = Task.new(position: "invalid")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, instance.move_to_between(prev_target, next_target, challenge: 5)
@@ -224,7 +242,8 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     next_target = Task.create!(position: "b20abc")
     instance = Narabikae::ActiveRecordExtension.new(
       current,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal true, instance.move_to_between(prev_target, next_target, challenge: 5)

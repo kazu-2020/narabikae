@@ -4,7 +4,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "create_last_position returns a0 when table is empty" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "a0", position.create_last_position
@@ -17,7 +18,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "c113", position.create_last_position
@@ -29,7 +31,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new(user_id: 1),
-      Narabikae::Option.new(field: :position, key_max_size: 30, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30, scope: %i[user_id])
     )
 
     assert_equal "a6", position.create_last_position
@@ -38,7 +41,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "create_first_position returns a0 when table is empty" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "a0", position.create_first_position
@@ -51,7 +55,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "Zz", position.create_first_position
@@ -63,7 +68,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new(user_id: 1),
-      Narabikae::Option.new(field: :position, key_max_size: 30, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30, scope: %i[user_id])
     )
 
     assert_equal "Zz", position.create_first_position
@@ -72,7 +78,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after accepts target record" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     target = Task.new(position: "a1")
 
@@ -82,7 +89,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after accepts position key string" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "a2", position.find_position_after("a1")
@@ -91,7 +99,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after returns nil for invalid target" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     target = Task.new(position: "invalid")
 
@@ -102,7 +111,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     target = Task.create!(position: "z" + "z" * 26)
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "z" + "z" * 26 + "V", position.find_position_after(target)
@@ -112,7 +122,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     Task.create!(position: "b10")
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "b11", position.find_position_after(nil)
@@ -121,7 +132,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after retries when first generated key is invalid" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
     target = Task.new(position: "a1")
 
@@ -136,7 +148,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after returns nil when all generated keys are invalid" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 0)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 0)
     )
     target = Task.new(position: "a1")
 
@@ -148,7 +161,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after returns nil when challenge is nil or 0" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 0)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 0)
     )
     target = Task.new(position: "a1")
 
@@ -158,7 +172,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after respects scope" do
     position = Narabikae::Position.new(
       Task.new(user_id: 1),
-      Narabikae::Option.new(field: :position, key_max_size: 30, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30, scope: %i[user_id])
     )
     target = Task.new(position: "a0", user_id: 1)
 
@@ -170,7 +185,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after raises on target model mismatch" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     error = assert_raises(Narabikae::Error) do
@@ -185,7 +201,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after raises on invalid target type" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     error = assert_raises(Narabikae::Error) do
@@ -198,7 +215,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after raises on scope mismatch" do
     position = Narabikae::Position.new(
       Task.new(user_id: 1),
-      Narabikae::Option.new(field: :position, key_max_size: 30, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30, scope: %i[user_id])
     )
 
     error = assert_raises(Narabikae::Error) do
@@ -212,7 +230,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_before accepts target record" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     target = Task.new(position: "a0")
 
@@ -222,7 +241,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_before returns nil for invalid target" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     target = Task.new(position: "invalid")
 
@@ -233,7 +253,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     target = Task.create!(position: "A" + "0" * 26)
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_nil position.find_position_before(target)
@@ -243,7 +264,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     target = Task.create!(position: "A" + "0" * 25 + "1")
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "A" + "0" * 26 + "V", position.find_position_before(target)
@@ -253,7 +275,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     Task.create!(position: "b10")
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "b0z", position.find_position_before(nil)
@@ -262,7 +285,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_before retries when first generated key is invalid" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
     target = Task.new(position: "a1")
 
@@ -277,7 +301,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_before returns nil when all generated keys are invalid" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 0)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 0)
     )
     target = Task.new(position: "a1")
 
@@ -289,7 +314,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_before returns nil when challenge is nil or 0" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 0)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 0)
     )
     target = Task.new(position: "a1")
 
@@ -299,7 +325,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_before respects scope" do
     position = Narabikae::Position.new(
       Task.new(user_id: 1),
-      Narabikae::Option.new(field: :position, key_max_size: 30, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30, scope: %i[user_id])
     )
     target = Task.new(position: "a1", user_id: 1)
 
@@ -311,7 +338,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between delegates to find_position_before when prev is nil" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     next_target = Task.new(position: "a0")
 
@@ -323,7 +351,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between delegates to find_position_after when next is nil" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     prev_target = Task.new(position: "a0")
 
@@ -335,7 +364,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between works when both targets are present" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "a0V", position.find_position_between(Task.new(position: "a1"), Task.new(position: "a0"))
@@ -344,7 +374,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between treats nil prev position as before" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     next_target = Task.new(position: "a0")
 
@@ -354,7 +385,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between treats nil next position as after" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     prev_target = Task.new(position: "a0")
 
@@ -364,7 +396,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between returns nil for invalid targets" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_nil position.find_position_between(Task.new(position: "invalid"), Task.new(position: "invalid"))
@@ -373,7 +406,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between retries when first generated key is invalid" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
     prev_target = Task.new(position: "a0")
     next_target = Task.new(position: "a2")
@@ -390,7 +424,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between returns nil when all generated keys are invalid" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 0)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 0)
     )
 
     assert_nil position.find_position_between(Task.new(position: "a0"), Task.new(position: "a2"))
@@ -399,7 +434,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between returns nil when challenge is nil or 0" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 0)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 0)
     )
     prev_target = Task.new(position: "a0")
     next_target = Task.new(position: "a2")
@@ -412,7 +448,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "current_first_position returns nil when table is empty" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_nil position.send(:current_first_position)
@@ -424,7 +461,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "Z91111", position.send(:current_first_position)
@@ -436,7 +474,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new(user_id: 1),
-      Narabikae::Option.new(field: :position, key_max_size: 30, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30, scope: %i[user_id])
     )
 
     assert_equal "a9", position.send(:current_first_position)
@@ -445,7 +484,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "current_last_position returns nil when table is empty" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_nil position.send(:current_last_position)
@@ -457,7 +497,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     assert_equal "a0", position.send(:current_last_position)
@@ -470,7 +511,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new(user_id: 1),
-      Narabikae::Option.new(field: :position, key_max_size: 30, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30, scope: %i[user_id])
     )
 
     assert_equal "a9", position.send(:current_last_position)
@@ -479,7 +521,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "capable? returns true when key is shorter than max" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal true, position.send(:capable?, "a0" + "a" * 7)
@@ -488,7 +531,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "capable? returns true when key equals max" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal true, position.send(:capable?, "a0" + "a" * 8)
@@ -497,7 +541,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "capable? returns false when key exceeds max" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, position.send(:capable?, "a0" + "a" * 9)
@@ -506,7 +551,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "model_scope returns all records when scope is empty" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal Task.where({}), position.send(:model_scope)
@@ -515,7 +561,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "model_scope raises when scope includes invalid value" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10, scope: [ :invalid ])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10, scope: [ :invalid ])
     )
 
     assert_raises(NoMethodError) { position.send(:model_scope) }
@@ -524,7 +571,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "model_scope uses record attributes for scope" do
     position = Narabikae::Position.new(
       Task.new(id: 1, name: "hello"),
-      Narabikae::Option.new(field: :position, key_max_size: 10, scope: %i[id name])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10, scope: %i[id name])
     )
 
     assert_equal Task.where(id: 1, name: "hello"), position.send(:model_scope)
@@ -535,7 +583,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, position.send(:uniq?, "a1")
@@ -544,7 +593,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "uniq? returns true when key not in use" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal true, position.send(:uniq?, "a1")
@@ -556,7 +606,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new(user_id: 1),
-      Narabikae::Option.new(field: :position, key_max_size: 10, scope: %i[user_id])
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10, scope: %i[user_id])
     )
 
     assert_equal true, position.send(:uniq?, "a1")
@@ -565,7 +616,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "valid? returns false for nil key" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, position.send(:valid?, nil)
@@ -574,7 +626,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "valid? returns false for empty key" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, position.send(:valid?, "")
@@ -583,7 +636,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "valid? returns false when key exceeds max size" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, position.send(:valid?, "a0" + "a" * 9)
@@ -594,7 +648,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal false, position.send(:valid?, "a1")
@@ -603,7 +658,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "valid? returns true for valid key" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 10)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 10)
     )
 
     assert_equal true, position.send(:valid?, "a0")
@@ -612,7 +668,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between uses minmax when prev and next are reversed" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     prev_target = Task.new(position: "a1")
     next_target = Task.new(position: "a0")
@@ -628,7 +685,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_before retry maintains order" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     target = Task.new(position: "a01")
 
@@ -643,7 +701,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_after retry maintains order" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
     target = Task.new(position: "aZ")
 
@@ -659,7 +718,8 @@ class NarabikaePositionTest < ActiveSupport::TestCase
   test "find_position_between maintains order with minmax" do
     position = Narabikae::Position.new(
       Task.new,
-      Narabikae::Option.new(field: :position, key_max_size: 30)
+      :position,
+      Narabikae::Configuration.new(key_max_size: 30)
     )
 
     prev_target = Task.new(position: "a1")

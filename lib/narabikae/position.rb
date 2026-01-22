@@ -1,26 +1,31 @@
 module Narabikae
   class Position
+    attr_reader :indexer, :record, :config, :field
+
     # Initializes a new instance of the Position class.
     #
     # @param record  [Object] Active Record object.
-    # @param option [Option]
-    def initialize(record, option)
+    # @param field [Symbol] The field name used for ordering.
+    # @param config [Configuration]
+    def initialize(record, field, config)
       @record = record
-      @option = option
+      @field = field
+      @config = config
+      @indexer = FractionalIndexer.new(base: config.base)
     end
 
     # Generates a new key for the last position
     #
     # @return [String] The newly generated key for the last position.
     def create_last_position
-      FractionalIndexer.generate_key(prev_key: current_last_position)
+      @indexer.generate_key(prev_key: current_last_position)
     end
 
     # Generates a new key for the first position
     #
     # @return [String] The newly generated key for the first position.
     def create_first_position
-      FractionalIndexer.generate_key(next_key: current_first_position)
+      @indexer.generate_key(next_key: current_first_position)
     end
 
     # Finds the position after the specified target.
@@ -34,11 +39,13 @@ module Narabikae
     def find_position_after(target, challenge: 10)
       # when target is nil, try to generate key from the last position
       target_key = extract_target_key(target) || current_last_position
-      key = FractionalIndexer.generate_key(prev_key: target_key)
+      key = @indexer.generate_key(prev_key: target_key)
       return key if valid?(key)
 
       (challenge || 0).times do |i|
-        key = FractionalIndexer.generate_key(prev_key: target_key, next_key: key)
+        break if key.nil?
+        key = @indexer.generate_key(prev_key: target_key, next_key: key)
+        break if key.nil?
         key += random_fractional
         return key if valid?(key)
       end
@@ -64,11 +71,13 @@ module Narabikae
     def find_position_before(target, challenge: 10)
       # when target is nil, try to generate key from the first position
       target_key = extract_target_key(target) || current_first_position
-      key = FractionalIndexer.generate_key(next_key: target_key)
+      key = @indexer.generate_key(next_key: target_key)
       return key if valid?(key)
 
       (challenge || 0).times do |i|
-        key = FractionalIndexer.generate_key(prev_key: key, next_key: target_key)
+        break if key.nil?
+        key = @indexer.generate_key(prev_key: key, next_key: target_key)
+        break if key.nil?
         key += random_fractional
         return key if valid?(key)
       end
@@ -91,14 +100,16 @@ module Narabikae
       return find_position_after(prev_target, challenge: challenge) if next_key.blank?
 
       prev_key, next_key = [ prev_key, next_key ].minmax
-      key = FractionalIndexer.generate_key(
+      key = @indexer.generate_key(
               prev_key: prev_key,
               next_key: next_key,
             )
       return key if valid?(key)
 
       (challenge || 0).times do |i|
-        key = FractionalIndexer.generate_key(prev_key: key, next_key: next_key)
+        break if key.nil?
+        key = @indexer.generate_key(prev_key: key, next_key: next_key)
+        break if key.nil?
         key += random_fractional
         return key if valid?(key)
       end
@@ -110,18 +121,17 @@ module Narabikae
 
     private
 
-    attr_reader :record, :option
-
     def capable?(key)
-      option.key_max_size >= key.size
+      return false if key.nil?
+      config.key_max_size >= key.size
     end
 
     def current_first_position
-      model.merge(model_scope).minimum(option.field)
+      model.merge(model_scope).minimum(field)
     end
 
     def current_last_position
-      model.merge(model_scope).maximum(option.field)
+      model.merge(model_scope).maximum(field)
     end
 
     def model
@@ -134,15 +144,15 @@ module Narabikae
     # @see https://github.com/kazu-2020/fractional_indexer?tab=readme-ov-file#fractional-part
     def random_fractional
       # `fractional` represents the fractional part, but to ensure that the last digit is not zero value (ex: base_62 => '0'), the range is set to [1..].
-      FractionalIndexer.configuration.digits[1..].sample
+      @indexer.digits[1..].sample
     end
 
     def model_scope
-      model.where(record.slice(*option.scope))
+      model.where(record.slice(*config.scope))
     end
 
     def uniq?(key)
-      model.where(option.field => key).merge(model_scope).empty?
+      model.where(field => key).merge(model_scope).empty?
     end
 
     def valid?(key)
@@ -169,9 +179,9 @@ module Narabikae
       if mismatched_columns.any?
         raise Narabikae::Error, "target scope mismatch for columns: #{mismatched_columns.join(', ')}"
       end
-      raise Narabikae::Error, "target missing #{option.field} field" unless target.respond_to?(option.field)
+      raise Narabikae::Error, "target missing #{field} field" unless target.respond_to?(field)
 
-      target.send(option.field)
+      target.send(field)
     end
 
     def table_name_for_class(value)
@@ -182,7 +192,7 @@ module Narabikae
     end
 
     def mismatched_scope_columns(target)
-      option.scope.select do |column|
+      config.scope.select do |column|
         !target.respond_to?(column) ||
           !record.respond_to?(column) ||
           target.public_send(column) != record.public_send(column)

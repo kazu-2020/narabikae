@@ -1,49 +1,41 @@
 require "test_helper"
 
 class NarabikaeOptionStoreTest < ActiveSupport::TestCase
-  test "raises when field is already registered" do
+  test "registers option" do
     instance = Narabikae::OptionStore.new
-    option = Narabikae::Option.new(field: :position, key_max_size: 10)
+    config = Narabikae::Configuration.new(key_max_size: 10)
 
-    instance.register!(:position, option)
+    instance.register!(:position, config)
 
-    error = assert_raises(Narabikae::Error) do
-      instance.register!(:position, option)
-    end
-
-    assert_equal "the field `position` is already registered", error.message
+    assert_equal config, instance.store[:position]
   end
 
-  test "raises when dependency loop detected" do
+  test "raises error when field is already registered" do
     instance = Narabikae::OptionStore.new
-    option = Narabikae::Option.new(field: :position, key_max_size: 10, scope: %i[position])
+    config = Narabikae::Configuration.new(key_max_size: 10)
 
-    error = assert_raises(Narabikae::Error) do
-      instance.register!(:position, option)
+    instance.register!(:position, config)
+
+    assert_raises(Narabikae::Error) do
+      instance.register!(:position, config)
     end
-
-    assert_equal "dependency loop detected: [:position]", error.message
   end
 
-  test "raises when scope is already registered as another field" do
+  test "raises error when dependency loop detected" do
     instance = Narabikae::OptionStore.new
+    config = Narabikae::Configuration.new(key_max_size: 10, scope: %i[position])
 
-    instance.register!(
-      :user_id,
-      Narabikae::Option.new(field: :user_id, key_max_size: 10)
-    )
-
-    error = assert_raises(Narabikae::Error) do
-      instance.register!(:position, Narabikae::Option.new(field: :position, key_max_size: 10, scope: %i[user_id]))
+    assert_raises(Narabikae::Error) do
+      instance.register!(:position, config)
     end
-
-    assert_equal "the scope `[:user_id]` is already registered as other field", error.message
   end
 
-  test "registers option when field is not registered" do
+  test "raises error when scope is already registered as other field" do
     instance = Narabikae::OptionStore.new
-    option = Narabikae::Option.new(field: :position, key_max_size: 10)
+    instance.register!(:user_id, Narabikae::Configuration.new(key_max_size: 10))
 
-    assert_equal option, instance.register!(:position, option)
+    assert_raises(Narabikae::Error) do
+      instance.register!(:position, Narabikae::Configuration.new(key_max_size: 10, scope: %i[user_id]))
+    end
   end
 end

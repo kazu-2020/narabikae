@@ -29,7 +29,6 @@ Gem::Specification.new do |spec|
   rails_version = ">= 7.1"
   spec.add_dependency "activerecord", rails_version
   spec.add_dependency "railties", rails_version
-  spec.add_dependency 'fractional_indexer', '>= 0.4.0'
 
   spec.add_development_dependency "appraisal"
   spec.add_development_dependency "debug", "~> 1.9"
