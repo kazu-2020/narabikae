@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   end
 
   spec.require_paths = [ "lib" ]
-  spec.required_ruby_version = ">= 3.1"
+  spec.required_ruby_version = ">= 3.2"
 
   rails_version = ">= 7.1"
   spec.add_dependency "activerecord", rails_version

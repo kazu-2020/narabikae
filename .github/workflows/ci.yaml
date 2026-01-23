@@ -24,9 +24,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Setup Ruby and install gems
-        uses: ruby/setup-ruby@90be1154f987f4dc0fe0dd0feedac9e473aa4ba8 # v1.286.0
+        uses: ruby/setup-ruby@90be1154f987f4dc0fe0dd0feedac9e473aa4ba8
         with:
           ruby-version: 3.4
           bundler-cache: true
@@ -43,7 +43,6 @@ jobs:
       fail-fast: false
       matrix:
         ruby-version:
-        - 3.1
         - 3.2
         - 3.3
         - 3.4
@@ -51,12 +50,6 @@ jobs:
         database: [ mysql, postgres, sqlite ]
         gemfile: [ rails_7_1, rails_7_2, rails_8_0, rails_8_1, rails_main ]
         exclude:
-          - ruby-version: "3.1"
-            gemfile: rails_8_0
-          - ruby-version: "3.1"
-            gemfile: rails_8_1
-          - ruby-version: "3.1"
-            gemfile: rails_main
           - ruby-version: "3.2"
             gemfile: rails_main
     services:
@@ -79,9 +72,9 @@ jobs:
       RAILS_ENV: test
     steps:
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Setup Ruby and install gems
-        uses: ruby/setup-ruby@90be1154f987f4dc0fe0dd0feedac9e473aa4ba8 # v1.286.0
+        uses: ruby/setup-ruby@90be1154f987f4dc0fe0dd0feedac9e473aa4ba8
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
@@ -96,7 +89,7 @@ jobs:
         run: bin/rails test
       - name: Upload logs on failure
         if: ${{ failure() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: logs-${{ matrix.database }}-${{ matrix.gemfile }}-ruby${{ matrix.ruby-version }}-attempt${{ github.run_attempt }}
           path: |
