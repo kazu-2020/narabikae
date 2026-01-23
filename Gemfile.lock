@@ -62,7 +62,7 @@ GEM
     drb (2.2.3)
     erb (6.0.1)
     erubi (1.13.1)
-    fractional_indexer (0.4.0)
+    fractional_indexer (0.4.1)
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     io-console (0.8.2)
