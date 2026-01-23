@@ -342,7 +342,7 @@ Feel free to message me on Github (kazu-2020)
 
 ### Supported versions (tested in CI)
 
-- Ruby 3.1, 3.2, 3.3, 3.4, 4.0
+- Ruby 3.2, 3.3, 3.4, 4.0
 - Rails 7.1, 7.2, 8.0, 8.1, and Rails main (via `railties` from `rails/rails`)
 
 ### Test suite
