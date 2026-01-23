@@ -173,22 +173,6 @@ end
 
 ## Usage Details
 
-### Methods Overview
-
-Narabikae dynamically generates the following methods based on your field name (e.g., `:position`):
-
-| Method | Description | Saves? |
-|--------|-------------|--------|
-| `move_to_position_after(target)` | Move after target (or to end if nil) | Yes |
-| `move_to_position_before(target)` | Move before target (or to start if nil) | Yes |
-| `move_to_position_between(prev, next)` | Move between two records | Yes |
-| `set_position_after(target)` | Set position after target | No |
-| `set_position_before(target)` | Set position before target | No |
-| `set_position_between(prev, next)` | Set position between two records | No |
-| `position_after=` | Setter alias for forms | No |
-| `position_before=` | Setter alias for forms | No |
-| `position_between=` | Setter alias for forms (accepts array or hash) | No |
-
 ### Reorder
 
 To insert an element after any specified item, use the `move_to_<field>_after` method.
