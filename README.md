@@ -4,7 +4,76 @@
 
 Narabikae(Japanese: 並び替え) means "reorder". Like [acts_as_list](https://github.com/brendon/acts_as_list), this gem provides automatic order management and reordering functionality for your records.
 
-One of the key advantages of this gem is its use of the [fractional indexing algorithm](https://www.figma.com/blog/realtime-editing-of-ordered-sequences/#fractional-indexing), which greatly enhances the efficiency of reordering operations. With Narabikae, regardless of the amount of data, "only a single record" is updated during the reordering process 🎉.
+One of the key advantages of this gem is its use of the [fractional indexing algorithm](https://www.figma.com/blog/realtime-editing-of-ordered-sequences/#fractional-indexing), which greatly enhances the efficiency of reordering operations. With Narabikae, regardless of the amount of data, "only a single record" is updated during the reordering process.
+
+## Why Narabikae?
+
+| Feature | acts_as_list | Narabikae |
+|---------|--------------|-----------|
+| Records updated on reorder | O(n) | O(1) |
+| Position type | Integer | String |
+| Algorithm | Sequential numbering | Fractional Indexing |
+| Best for | Small lists, infrequent reordering | Large lists, frequent reordering |
+
+**Example:** When moving an item to position 1 in a list of 10,000 items:
+- **acts_as_list**: Updates up to 10,000 records to shift positions
+- **Narabikae**: Updates only 1 record
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+  - [Adding a column to manage order](#adding-a-column-to-manage-order)
+  - [Adding configuration to your model](#adding-configuration-to-your-model)
+- [Usage Details](#usage-details)
+  - [Methods Overview](#methods-overview)
+  - [Reorder](#reorder)
+  - [Set without saving](#set-without-saving)
+  - [Form-friendly setters](#form-friendly-setters)
+  - [Scope](#scope)
+  - [Retry generating position](#retry-generating-position)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Quick Start
+
+Get up and running in 3 steps:
+
+```ruby
+# 1. Add to Gemfile
+gem "narabikae"
+```
+
+```ruby
+# 2. Create migration
+add_column :tasks, :position, :string, null: false
+add_index :tasks, :position, unique: true
+```
+
+```ruby
+# 3. Add to your model
+class Task < ApplicationRecord
+  narabikae :position, size: 255
+end
+```
+
+That's it! Your model now has automatic position management:
+
+```ruby
+Task.create([{ name: 'Task A' }, { name: 'Task B' }, { name: 'Task C' }])
+Task.order(:position).pluck(:name)
+# => ["Task A", "Task B", "Task C"]
+
+# Move Task A after Task C
+task_a = Task.find_by(name: 'Task A')
+task_c = Task.find_by(name: 'Task C')
+task_a.move_to_position_after(task_c)
+
+Task.order(:position).pluck(:name)
+# => ["Task B", "Task C", "Task A"]
+```
 
 ## Installation
 
@@ -43,7 +112,7 @@ add_index :tasks, :position, unique: true
 
 - Set the collation to distinguish between uppercase and lowercase letters.
 
-  For example, if using MySQL 8.0’s default collation (utf8mb4_0900_ai_ci), which does not distinguish between uppercase and lowercase, the sort results may not behave as expected.
+  For example, if using MySQL 8.0's default collation (utf8mb4_0900_ai_ci), which does not distinguish between uppercase and lowercase, the sort results may not behave as expected.
 
 - It is recommended to apply both NOT NULL and UNIQUE constraints.
 
@@ -103,6 +172,22 @@ end
 ```
 
 ## Usage Details
+
+### Methods Overview
+
+Narabikae dynamically generates the following methods based on your field name (e.g., `:position`):
+
+| Method | Description | Saves? |
+|--------|-------------|--------|
+| `move_to_position_after(target)` | Move after target (or to end if nil) | Yes |
+| `move_to_position_before(target)` | Move before target (or to start if nil) | Yes |
+| `move_to_position_between(prev, next)` | Move between two records | Yes |
+| `set_position_after(target)` | Set position after target | No |
+| `set_position_before(target)` | Set position before target | No |
+| `set_position_between(prev, next)` | Set position between two records | No |
+| `position_after=` | Setter alias for forms | No |
+| `position_before=` | Setter alias for forms | No |
+| `position_between=` | Setter alias for forms (accepts array or hash) | No |
 
 ### Reorder
 
@@ -189,7 +274,7 @@ target.position_after = tasks.last
 target.position_between = [tasks.first, tasks.last]
 ```
 
-#### Form-friendly setters
+### Form-friendly setters
 
 The setter aliases can be used directly in forms or `assign_attributes`. They accept a target record or a position key (string). For `*_between=`, you can pass an array or hash. Primary key inputs are not accepted; do your own lookup and pass the record or its position.
 
