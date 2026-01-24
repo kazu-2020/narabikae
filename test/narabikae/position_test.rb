@@ -118,19 +118,18 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     assert_equal "b11", position.find_position_after(nil)
   end
 
-  test "find_position_after retries when first generated key is invalid" do
+  test "find_position_after finds neighbor and generates midpoint without retry" do
     position = Narabikae::Position.new(
       Task.new,
       Narabikae::Option.new(field: :position, key_max_size: 10)
     )
     target = Task.new(position: "a1")
 
-    position.expects(:random_fractional).returns("C")
     Task.create!(position: "a2")
 
     key = position.find_position_after(target)
-    assert_equal "a1VC", key
     assert key > target.position
+    assert key < "a2"
   end
 
   test "find_position_after returns nil when all generated keys are invalid" do
@@ -259,19 +258,18 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     assert_equal "b0z", position.find_position_before(nil)
   end
 
-  test "find_position_before retries when first generated key is invalid" do
+  test "find_position_before finds neighbor and generates midpoint without retry" do
     position = Narabikae::Position.new(
       Task.new,
       Narabikae::Option.new(field: :position, key_max_size: 10)
     )
     target = Task.new(position: "a1")
 
-    position.expects(:random_fractional).returns("Z")
     Task.create!(position: "a0")
 
     key = position.find_position_before(target)
-    assert_equal "a0VZ", key
     assert key < target.position
+    assert key > "a0"
   end
 
   test "find_position_before returns nil when all generated keys are invalid" do
@@ -625,34 +623,31 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     assert_not prev_target.position < key && key < next_target.position
   end
 
-  test "find_position_before retry maintains order" do
+  test "find_position_before with neighbor maintains order" do
     position = Narabikae::Position.new(
       Task.new,
       Narabikae::Option.new(field: :position, key_max_size: 30)
     )
     target = Task.new(position: "a01")
 
-    position.expects(:random_fractional).returns("Z")
     Task.create!(position: "a0")
 
     key = position.find_position_before(target)
     assert key < target.position
-    assert_equal "a00VZ", key
+    assert key > "a0"
   end
 
-  test "find_position_after retry maintains order" do
+  test "find_position_after with neighbor maintains order" do
     position = Narabikae::Position.new(
       Task.new,
       Narabikae::Option.new(field: :position, key_max_size: 30)
     )
     target = Task.new(position: "aZ")
 
-    position.expects(:random_fractional).returns("Z")
     Task.create!(position: "aa")
 
     key = position.find_position_after(target)
     assert key > target.position
-    assert_equal "aZVZ", key
     assert key < "aa"
   end
 
@@ -671,5 +666,246 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     assert key.start_with?("a0")
     assert key > "a0"
     assert key < "a1"
+  end
+
+  # --- Neighbor-aware optimization tests ---
+
+  test "find_next_position_key returns nearest position after given key" do
+    Task.create!(position: "a0")
+    Task.create!(position: "a5")
+    Task.create!(position: "b10")
+
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 30)
+    )
+
+    assert_equal "a5", position.send(:find_next_position_key, "a0")
+    assert_equal "b10", position.send(:find_next_position_key, "a5")
+    assert_nil position.send(:find_next_position_key, "b10")
+  end
+
+  test "find_prev_position_key returns nearest position before given key" do
+    Task.create!(position: "a0")
+    Task.create!(position: "a5")
+    Task.create!(position: "b10")
+
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 30)
+    )
+
+    assert_nil position.send(:find_prev_position_key, "a0")
+    assert_equal "a0", position.send(:find_prev_position_key, "a5")
+    assert_equal "a5", position.send(:find_prev_position_key, "b10")
+  end
+
+  test "find_next_position_key respects scope" do
+    Task.create!(user_id: 1, position: "a0")
+    Task.create!(user_id: 1, position: "a5")
+    Task.create!(user_id: 2, position: "a2")
+
+    position = Narabikae::Position.new(
+      Task.new(user_id: 1),
+      Narabikae::Option.new(field: :position, key_max_size: 30, scope: %i[user_id])
+    )
+
+    # Should find "a5" (user 1), not "a2" (user 2)
+    assert_equal "a5", position.send(:find_next_position_key, "a0")
+  end
+
+  test "find_prev_position_key respects scope" do
+    Task.create!(user_id: 1, position: "a5")
+    Task.create!(user_id: 2, position: "a3")
+
+    position = Narabikae::Position.new(
+      Task.new(user_id: 1),
+      Narabikae::Option.new(field: :position, key_max_size: 30, scope: %i[user_id])
+    )
+
+    # Should return nil (no user 1 records before "a5"), not "a3" (user 2)
+    assert_nil position.send(:find_prev_position_key, "a5")
+  end
+
+  test "find_next_position_key returns nil for nil key" do
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 30)
+    )
+
+    assert_nil position.send(:find_next_position_key, nil)
+  end
+
+  test "find_prev_position_key returns nil for nil key" do
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 30)
+    )
+
+    assert_nil position.send(:find_prev_position_key, nil)
+  end
+
+  test "find_position_after with many records between generates correct midpoint" do
+    # Simulates a filtered view: user only sees target, but many records exist after it
+    Task.create!(position: "a0")
+    Task.create!(position: "a1")
+    Task.create!(position: "a2")
+    Task.create!(position: "a3")
+
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 30)
+    )
+    target = Task.new(position: "a0")
+
+    # Should find "a1" as next neighbor and generate midpoint between "a0" and "a1"
+    key = position.find_position_after(target)
+    assert key > "a0"
+    assert key < "a1"
+  end
+
+  test "find_position_before with many records before generates correct midpoint" do
+    Task.create!(position: "a0")
+    Task.create!(position: "a1")
+    Task.create!(position: "a2")
+    Task.create!(position: "a3")
+
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 30)
+    )
+    target = Task.new(position: "a3")
+
+    # Should find "a2" as prev neighbor and generate midpoint between "a2" and "a3"
+    key = position.find_position_before(target)
+    assert key > "a2"
+    assert key < "a3"
+  end
+
+  test "find_position_after at end of list appends after last" do
+    Task.create!(position: "a0")
+    Task.create!(position: "a5")
+
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 30)
+    )
+    target = Task.new(position: "a5")
+
+    # No next neighbor, should generate key after "a5"
+    key = position.find_position_after(target)
+    assert key > "a5"
+  end
+
+  test "find_position_before at start of list prepends before first" do
+    Task.create!(position: "a5")
+    Task.create!(position: "a9")
+
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 30)
+    )
+    target = Task.new(position: "a5")
+
+    # No prev neighbor, should generate key before "a5"
+    key = position.find_position_before(target)
+    assert key < "a5"
+  end
+
+  # --- Ordering correctness in dense lists ---
+
+  test "find_position_after lands immediately after target in dense list" do
+    # Create a base list and insert many records after the same target,
+    # simulating a user repeatedly adding tasks after the same position.
+    keys = FractionalIndexer.generate_keys(count: 10)
+    keys.each { |k| Task.create!(position: k) }
+
+    target = Task.find_by(position: keys[5])
+
+    # Build a dense cluster after the target (20 insertions)
+    20.times do
+      pos = Narabikae::Position.new(
+        Task.new,
+        Narabikae::Option.new(field: :position, key_max_size: 200)
+      )
+      key = pos.find_position_after(target)
+      Task.create!(position: key)
+    end
+
+    # Now verify: find_position_after(target) should produce a key
+    # that is LESS than the immediate next neighbor
+    actual_next = Task.where("position > ?", target.position).order(:position).first
+
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 200)
+    )
+    key = position.find_position_after(target)
+
+    assert key > target.position, "Generated key should be after target"
+    assert key < actual_next.position,
+      "Generated key (#{key}) should be immediately after target, " \
+      "but it exceeds the next neighbor (#{actual_next.position}). " \
+      "This means the task would appear in the wrong position."
+  end
+
+  test "find_position_before lands immediately before target in dense list" do
+    keys = FractionalIndexer.generate_keys(count: 10)
+    keys.each { |k| Task.create!(position: k) }
+
+    target = Task.find_by(position: keys[5])
+
+    # Build a dense cluster before the target (20 insertions)
+    20.times do
+      pos = Narabikae::Position.new(
+        Task.new,
+        Narabikae::Option.new(field: :position, key_max_size: 200)
+      )
+      key = pos.find_position_before(target)
+      Task.create!(position: key)
+    end
+
+    # Now verify: find_position_before(target) should produce a key
+    # that is GREATER than the immediate previous neighbor
+    actual_prev = Task.where("position < ?", target.position).order(position: :desc).first
+
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 200)
+    )
+    key = position.find_position_before(target)
+
+    assert key < target.position, "Generated key should be before target"
+    assert key > actual_prev.position,
+      "Generated key (#{key}) should be immediately before target, " \
+      "but it precedes the previous neighbor (#{actual_prev.position}). " \
+      "This means the task would appear in the wrong position."
+  end
+
+  test "repeated find_position_after always lands immediately after target" do
+    keys = FractionalIndexer.generate_keys(count: 10)
+    keys.each { |k| Task.create!(position: k) }
+
+    target = Task.find_by(position: keys[5])
+
+    # Simulate 50 drag-to-reposition operations, each inserting the result
+    50.times do |i|
+      actual_next = Task.where("position > ?", target.position).order(:position).first
+
+      position = Narabikae::Position.new(
+        Task.new,
+        Narabikae::Option.new(field: :position, key_max_size: 200)
+      )
+      key = position.find_position_after(target)
+
+      assert key > target.position,
+        "Iteration #{i}: key should be after target"
+      assert key < actual_next.position,
+        "Iteration #{i}: key (#{key}) exceeded next neighbor (#{actual_next.position}). " \
+        "Task would appear #{Task.where('position > ? AND position < ?', target.position, key).count} " \
+        "places away from intended position."
+
+      Task.create!(position: key)
+    end
   end
 end

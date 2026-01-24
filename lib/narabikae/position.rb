@@ -24,9 +24,12 @@ module Narabikae
     end
 
     # Finds the position after the specified target.
-    # If generated key is invalid(ex: it already exists),
-    # a new key is generated until the challenge count reaches the limit.
-    # challenge count is 10 by default.
+    #
+    # Uses an optimized neighbor-aware approach: queries the database for the
+    # next record's position and generates a key between the target and its
+    # neighbor. This avoids blind key generation and reduces collision retries.
+    #
+    # Falls back to retry with random fractional for concurrent write race conditions.
     #
     # @param target [ActiveRecord::Base, String]
     # @param challenge [Integer] The number of times to attempt finding a valid position.
@@ -34,7 +37,8 @@ module Narabikae
     def find_position_after(target, challenge: 10)
       # when target is nil, try to generate key from the last position
       target_key = extract_target_key(target) || current_last_position
-      key = FractionalIndexer.generate_key(prev_key: target_key)
+      next_key = find_next_position_key(target_key)
+      key = FractionalIndexer.generate_key(prev_key: target_key, next_key: next_key)
       return key if valid?(key)
 
       (challenge || 0).times do |i|
@@ -48,15 +52,13 @@ module Narabikae
       nil
     end
 
-    #
     # Finds the position before the target position.
-    # If generated key is invalid(ex: it already exists),
-    # a new key is generated until the challenge count reaches the limit.
-    # challenge count is 10 by default.
     #
-    # @example
-    #   position = Position.new
-    #   position.find_position_before(target, challenge: 5)
+    # Uses an optimized neighbor-aware approach: queries the database for the
+    # previous record's position and generates a key between the neighbor and
+    # the target. This avoids blind key generation and reduces collision retries.
+    #
+    # Falls back to retry with random fractional for concurrent write race conditions.
     #
     # @param target [ActiveRecord::Base, String]
     # @param challenge [Integer] The number of times to attempt finding a valid position.
@@ -64,7 +66,8 @@ module Narabikae
     def find_position_before(target, challenge: 10)
       # when target is nil, try to generate key from the first position
       target_key = extract_target_key(target) || current_first_position
-      key = FractionalIndexer.generate_key(next_key: target_key)
+      prev_key = find_prev_position_key(target_key)
+      key = FractionalIndexer.generate_key(prev_key: prev_key, next_key: target_key)
       return key if valid?(key)
 
       (challenge || 0).times do |i|
@@ -122,6 +125,34 @@ module Narabikae
 
     def current_last_position
       model.merge(model_scope).maximum(option.field)
+    end
+
+    # Finds the position key of the next record after the given key within scope.
+    # Uses an indexed query for O(1) lookup.
+    #
+    # @param key [String] The position key to search after.
+    # @return [String, nil] The next position key, or nil if no record exists after.
+    def find_next_position_key(key)
+      return nil if key.nil?
+
+      model.merge(model_scope)
+           .where(model.arel_table[option.field].gt(key))
+           .order(option.field => :asc)
+           .pick(option.field)
+    end
+
+    # Finds the position key of the previous record before the given key within scope.
+    # Uses an indexed query for O(1) lookup.
+    #
+    # @param key [String] The position key to search before.
+    # @return [String, nil] The previous position key, or nil if no record exists before.
+    def find_prev_position_key(key)
+      return nil if key.nil?
+
+      model.merge(model_scope)
+           .where(model.arel_table[option.field].lt(key))
+           .order(option.field => :desc)
+           .pick(option.field)
     end
 
     def model

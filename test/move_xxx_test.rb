@@ -43,8 +43,7 @@ class MoveXxxTest < ActiveSupport::TestCase
     assert_equal true, current.move_to_position_before(target)
 
     new_position = current.reload.position
-    assert new_position.start_with?("a0V")
-    assert_equal 4, new_position.length
+    assert new_position < target.position
   end
 
   test "move_to_position_between behaves like before when prev is nil" do
@@ -54,8 +53,7 @@ class MoveXxxTest < ActiveSupport::TestCase
     assert_equal true, current.move_to_position_between(nil, next_target)
 
     new_position = current.reload.position
-    assert new_position.start_with?("a0V")
-    assert_equal 4, new_position.length
+    assert new_position < next_target.position
   end
 
   test "move_to_position_between behaves like after when next is nil" do
@@ -100,8 +98,7 @@ class MoveXxxTest < ActiveSupport::TestCase
     assert_equal "a0", current.position
 
     new_position = current.set_position_between(nil, next_target)
-    assert new_position.start_with?("a0V")
-    assert_equal 4, new_position.length
+    assert new_position < next_target.position
     assert_equal new_position, current.position
     assert_equal "a0", current.reload.position
   end

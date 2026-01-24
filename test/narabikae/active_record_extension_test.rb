@@ -124,8 +124,10 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
       Narabikae::Option.new(field: :position, key_max_size: 10)
     )
 
-    assert_equal "b10", instance.set_before(target, challenge: nil)
-    assert_equal "b10", current.position
+    result = instance.set_before(target, challenge: nil)
+    assert result > "a0"
+    assert result < "b10abc"
+    assert_equal result, current.position
     assert_equal "a0", current.reload.position
   end
 
@@ -202,7 +204,9 @@ class NarabikaeActiveRecordExtensionTest < ActiveSupport::TestCase
     )
 
     assert_equal true, instance.move_to_before(target, challenge: nil)
-    assert_equal "b10", current.reload.position
+    new_position = current.reload.position
+    assert new_position > "a0"
+    assert new_position < "b10abc"
   end
 
   test "move_to_between returns false when position generation fails" do
