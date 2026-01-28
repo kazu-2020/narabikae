@@ -35,9 +35,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "debug", "~> 1.9"
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "mocha"
-  # Uncomment the database adapter(s) you need for local testing:
-  # spec.add_development_dependency "mysql2"
-  # spec.add_development_dependency "pg"
+  spec.add_development_dependency "mysql2"
+  spec.add_development_dependency "pg"
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "rubocop-rails-omakase"
 end
