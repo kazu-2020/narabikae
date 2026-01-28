@@ -128,7 +128,7 @@ module Narabikae
     end
 
     # Finds the position key of the next record after the given key within scope.
-    # Uses an indexed query for O(1) lookup.
+    # Uses an indexed query for O(log n) lookup.
     #
     # @param key [String] The position key to search after.
     # @return [String, nil] The next position key, or nil if no record exists after.
@@ -142,7 +142,7 @@ module Narabikae
     end
 
     # Finds the position key of the previous record before the given key within scope.
-    # Uses an indexed query for O(1) lookup.
+    # Uses an indexed query for O(log n) lookup.
     #
     # @param key [String] The position key to search before.
     # @return [String, nil] The previous position key, or nil if no record exists before.
