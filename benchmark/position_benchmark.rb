@@ -266,7 +266,7 @@ puts "-" * 70
 puts "Scenario 1: Insert after LAST task (no collision possible)"
 puts "-" * 70
 
-[100, 1000, 10_000].each do |n|
+[ 100, 1000, 10_000 ].each do |n|
   keys = setup_dense_tasks(n)
   last_task = Task.find_by(position: keys.last)
 
@@ -289,7 +289,7 @@ puts "Scenario 2: Insert after a MIDDLE task (next position occupied)"
 puts "  OLD must retry; NEW finds neighbor and generates midpoint"
 puts "-" * 70
 
-[100, 1000, 10_000].each do |n|
+[ 100, 1000, 10_000 ].each do |n|
   keys = setup_dense_tasks(n)
   # Pick a task in the middle - the next position is occupied
   mid_index = n / 2
@@ -323,7 +323,7 @@ setup_dense_tasks(10_000)
 keys = Task.order(:position).pluck(:position)
 mid_task = Task.find_by(position: keys[5000])
 
-[10, 100, 1000].each do |insertions|
+[ 10, 100, 1000 ].each do |insertions|
   # Reset to clean state
   setup_dense_tasks(10_000)
   keys = Task.order(:position).pluck(:position)
@@ -420,7 +420,7 @@ puts "Scenario 5: Key length growth under repeated same-position insertions"
 puts "  Simulates a user repeatedly adding tasks after the same task"
 puts "-" * 70
 
-[10, 100, 1000].each do |insertions|
+[ 10, 100, 1000 ].each do |insertions|
   setup_dense_tasks(10_000)
   target = Task.find_by(position: Task.order(:position).pluck(:position)[5000])
 
@@ -466,7 +466,7 @@ puts "  After repeated insertions create dense clusters, does 'position after X'
 puts "  actually land IMMEDIATELY after X, or somewhere further in the list?"
 puts "-" * 70
 
-[10, 100, 1000].each do |prior_insertions|
+[ 10, 100, 1000 ].each do |prior_insertions|
   # Step 1: Create a base list
   setup_dense_tasks(100)
   keys = Task.order(:position).pluck(:position)
