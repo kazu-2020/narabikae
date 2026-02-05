@@ -1,6 +1,6 @@
-<% def database_name_from(name); ENV["TARGET_DB"] == "sqlite" ? "db/#{name}.sqlite3" : name; end %>
+<% target_db = ENV["TARGET_DB"] || "sqlite" %>
 
-<% if ENV["TARGET_DB"] == "sqlite" %>
+<% if target_db == "sqlite" %>
 default: &default
   adapter: sqlite3
   pool: 50
@@ -10,7 +10,7 @@ default: &default
   retries: 100 # "retries" is deprecated in rails 8 and will be removed in rails 8.1
   <% end %>
 
-<% elsif ENV["TARGET_DB"] == "postgres" %>
+<% elsif target_db == "postgres" %>
 default: &default
   adapter: postgresql
   encoding: unicode
@@ -32,9 +32,9 @@ default: &default
 development:
   primary:
     <<: *default
-    database: <%= database_name_from("development") %>
+    database: <%= target_db == "sqlite" ? "db/development.sqlite3" : "development" %>
 
 test:
   primary:
     <<: *default
-    database: <%= database_name_from("narabikae_test") %>
+    database: <%= target_db == "sqlite" ? "db/narabikae_test.sqlite3" : "narabikae_test" %>
