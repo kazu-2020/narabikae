@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "appraisal"
   spec.add_development_dependency "debug", "~> 1.9"
-  spec.add_development_dependency "minitest", "~> 5.0"
+  spec.add_development_dependency "minitest", "~> 6.0"
   spec.add_development_dependency "mocha"
   spec.add_development_dependency "mysql2"
   spec.add_development_dependency "pg"
