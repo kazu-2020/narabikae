@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Setup Ruby and install gems
         uses: ruby/setup-ruby@8e41b362d2589a22a44c1cfa214b3c83052c195b
         with:
@@ -72,7 +72,7 @@ jobs:
       RAILS_ENV: test
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Setup Ruby and install gems
         uses: ruby/setup-ruby@8e41b362d2589a22a44c1cfa214b3c83052c195b
         with:
