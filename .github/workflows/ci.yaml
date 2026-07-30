@@ -26,7 +26,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Setup Ruby and install gems
-        uses: ruby/setup-ruby@8e41b362d2589a22a44c1cfa214b3c83052c195b
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b
         with:
           ruby-version: 3.4
           bundler-cache: true
@@ -74,7 +74,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Setup Ruby and install gems
-        uses: ruby/setup-ruby@8e41b362d2589a22a44c1cfa214b3c83052c195b
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
