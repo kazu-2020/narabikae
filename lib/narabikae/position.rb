@@ -39,12 +39,12 @@ module Narabikae
       target_key = extract_target_key(target) || current_last_position
       next_key = find_next_position_key(target_key)
       key = FractionalIndexer.generate_key(prev_key: target_key, next_key: next_key)
-      return key if valid?(key)
+      return key if valid?(key, prev_key: target_key, next_key: next_key)
 
       (challenge || 0).times do |i|
         key = FractionalIndexer.generate_key(prev_key: target_key, next_key: key)
-        key += random_fractional
-        return key if valid?(key)
+        key = append_random_fractional(key, prev_key: target_key, next_key: next_key)
+        return key if valid?(key, prev_key: target_key, next_key: next_key)
       end
 
       nil
@@ -68,12 +68,12 @@ module Narabikae
       target_key = extract_target_key(target) || current_first_position
       prev_key = find_prev_position_key(target_key)
       key = FractionalIndexer.generate_key(prev_key: prev_key, next_key: target_key)
-      return key if valid?(key)
+      return key if valid?(key, prev_key: prev_key, next_key: target_key)
 
       (challenge || 0).times do |i|
         key = FractionalIndexer.generate_key(prev_key: key, next_key: target_key)
-        key += random_fractional
-        return key if valid?(key)
+        key = append_random_fractional(key, prev_key: prev_key, next_key: target_key)
+        return key if valid?(key, prev_key: prev_key, next_key: target_key)
       end
 
       nil
@@ -98,12 +98,12 @@ module Narabikae
               prev_key: prev_key,
               next_key: next_key,
             )
-      return key if valid?(key)
+      return key if valid?(key, prev_key: prev_key, next_key: next_key)
 
       (challenge || 0).times do |i|
         key = FractionalIndexer.generate_key(prev_key: key, next_key: next_key)
-        key += random_fractional
-        return key if valid?(key)
+        key = append_random_fractional(key, prev_key: prev_key, next_key: next_key)
+        return key if valid?(key, prev_key: prev_key, next_key: next_key)
       end
 
       nil
@@ -168,6 +168,19 @@ module Narabikae
       FractionalIndexer.configuration.digits[1..].sample
     end
 
+    # Appends a random fractional part to reduce collisions with concurrent writes.
+    # Falls back to the key as is when the appended key would fall outside of the range
+    # (e.g. key: "a2", next_key: "a2V" => "a2z" is greater than next_key).
+    #
+    # @param key [String] The key generated between prev_key and next_key.
+    # @param prev_key [String, nil] The lower bound (exclusive).
+    # @param next_key [String, nil] The upper bound (exclusive).
+    # @return [String] The key with a random fractional part, or the key as is.
+    def append_random_fractional(key, prev_key:, next_key:)
+      salted_key = key + random_fractional
+      in_range?(salted_key, prev_key: prev_key, next_key: next_key) ? salted_key : key
+    end
+
     def model_scope
       model.where(record.slice(*option.scope))
     end
@@ -176,10 +189,14 @@ module Narabikae
       model.where(option.field => key).merge(model_scope).empty?
     end
 
-    def valid?(key)
+    def in_range?(key, prev_key:, next_key:)
+      (prev_key.nil? || prev_key < key) && (next_key.nil? || key < next_key)
+    end
+
+    def valid?(key, prev_key: nil, next_key: nil)
       return false if key.blank?
 
-      capable?(key) && uniq?(key)
+      in_range?(key, prev_key: prev_key, next_key: next_key) && capable?(key) && uniq?(key)
     end
 
     def extract_target_key(target)

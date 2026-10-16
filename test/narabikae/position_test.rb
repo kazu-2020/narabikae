@@ -294,6 +294,26 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     assert_nil position.find_position_before(target, challenge: 0)
   end
 
+  test "find_position_before does not exceed target when retried key is a prefix of it" do
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 10)
+    )
+    target = Task.new(position: "a2V")
+
+    # Simulate "a1" being inserted concurrently after the neighbor lookup returned "a0".
+    # The retried key "a2" is a prefix of "a2V", so appending "z" would give "a2z",
+    # which is greater than the target.
+    position.stubs(:find_prev_position_key).returns("a0")
+    position.stubs(:random_fractional).returns("z")
+    Task.create!(position: "a0")
+    Task.create!(position: "a1")
+
+    key = position.find_position_before(target)
+    assert_equal "a2", key
+    assert key < target.position
+  end
+
   test "find_position_before respects scope" do
     position = Narabikae::Position.new(
       Task.new(user_id: 1),
@@ -381,6 +401,25 @@ class NarabikaePositionTest < ActiveSupport::TestCase
 
     key = position.find_position_between(prev_target, next_target)
     assert_equal "a1Vt", key
+    assert key > prev_target.position
+    assert key < next_target.position
+  end
+
+  test "find_position_between does not exceed next position when retried key is a prefix of it" do
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 10)
+    )
+    prev_target = Task.new(position: "a0")
+    next_target = Task.new(position: "a2V")
+
+    # "a1" collides, and the retried key "a2" is a prefix of "a2V",
+    # so appending "z" would give "a2z", which is greater than "a2V".
+    position.stubs(:random_fractional).returns("z")
+    Task.create!(position: "a1")
+
+    key = position.find_position_between(prev_target, next_target)
+    assert_equal "a2", key
     assert key > prev_target.position
     assert key < next_target.position
   end
@@ -605,6 +644,18 @@ class NarabikaePositionTest < ActiveSupport::TestCase
     )
 
     assert_equal true, position.send(:valid?, "a0")
+  end
+
+  test "valid? returns false when key is out of range" do
+    position = Narabikae::Position.new(
+      Task.new,
+      Narabikae::Option.new(field: :position, key_max_size: 10)
+    )
+
+    assert_equal true, position.send(:valid?, "a2", prev_key: "a1", next_key: "a2V")
+    assert_equal false, position.send(:valid?, "a2z", prev_key: "a1", next_key: "a2V")
+    assert_equal false, position.send(:valid?, "a1", prev_key: "a1", next_key: "a2V")
+    assert_equal false, position.send(:valid?, "a2V", prev_key: "a1", next_key: "a2V")
   end
 
   test "find_position_between uses minmax when prev and next are reversed" do
